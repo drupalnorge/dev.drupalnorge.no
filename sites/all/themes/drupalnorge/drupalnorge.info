@@ -19,6 +19,9 @@
   ; Print - uncomment to load basic print styles.
   ; stylesheets[print][] = css/print.css
 
+  ; Custom DrupalNorge styles
+  stylesheets[screen][] = css/drupalnorge.css
+
 
   ; Internet Explorer Stylesheets
   ;

@@ -1,0 +1,21 @@
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\000039}}
+#logo {
+  margin-top: 5px;
+}
+@media (min-width: 480px) {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\000039}}
+  #logo {
+    margin-top: 10px;
+  }
+}
+
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\0000317}}
+#site-name {
+  font-size: 35px;
+}
+@media (max-width: 768px) and (min-width: 481px) {
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\0000317}}
+  #site-name {
+    font-size: 25px;
+  }
+}
