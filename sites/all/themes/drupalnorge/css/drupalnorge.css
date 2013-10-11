@@ -1,20 +1,24 @@
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\000039}}
 #logo {
   margin-top: 5px;
+  max-width: 29px;
+  padding-left: 10px;
 }
 @media (min-width: 480px) {
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\000039}}
   #logo {
-    margin-top: 10px;
+    margin-top: 5px;
+    padding-left: none;
+    max-width: none;
   }
 }
 
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\0000317}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\0000321}}
 #site-name {
   font-size: 35px;
 }
 @media (max-width: 768px) and (min-width: 481px) {
-@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\0000317}}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/rabbel15\/Sites\/front\/drupalnorge\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\0000321}}
   #site-name {
     font-size: 25px;
   }

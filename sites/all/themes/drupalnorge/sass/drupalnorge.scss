@@ -8,9 +8,13 @@
 // Header
 #logo {
   margin-top: 5px;
+  max-width: 29px;
+  padding-left: 10px;
 
   @media (min-width: 480px) {
-    margin-top: 10px;
+    margin-top: 5px;
+    padding-left: none;
+    max-width: none;
   }
 }
 
