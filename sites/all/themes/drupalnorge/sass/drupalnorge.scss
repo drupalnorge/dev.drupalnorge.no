@@ -1,9 +1,9 @@
 // Imports
 @import "base";
 
-// 
+//
 // Custom style
-// 
+//
 
 // Header
 #logo {
@@ -26,3 +26,13 @@
   }
 }
 
+.node-content{
+	h1 {font-size: 32px;}
+	h2 {font-size: 24px;}
+	h3 {font-size: 18px;}
+
+	h1, h2, h3 {
+		line-height: 1.69em;
+		margin: .3em 0 .6em 0;
+	}
+}
