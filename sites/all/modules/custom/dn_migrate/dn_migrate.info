@@ -1,0 +1,11 @@
+name = "Drupal Norge migration"
+description = "The Drupal Norge drupal 6 to 7 migration."
+core = 7.x
+dependencies[] = taxonomy
+dependencies[] = image
+dependencies[] = comment
+dependencies[] = migrate
+dependencies[] = list
+dependencies[] = number
+
+files[] = dn_users.inc
