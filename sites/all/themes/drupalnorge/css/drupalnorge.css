@@ -43,6 +43,10 @@
 }
 
 @media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/thorandre\/Sites\/drupalnorge\.no\/public_html\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\0000341}}
+.view-user-list .item-list ul {
+  text-align: center;
+}
+@media -sass-debug-info{filename{font-family:file\:\/\/\/Users\/thorandre\/Sites\/drupalnorge\.no\/public_html\/sites\/all\/themes\/drupalnorge\/sass\/drupalnorge\.scss}line{font-family:\0000344}}
 .view-user-list .item-list ul li {
   display: inline;
   height: 104px;

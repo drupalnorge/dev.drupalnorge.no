@@ -37,12 +37,16 @@
 	}
 }
 
-// Styling for listing av brukere
-.view-user-list	.item-list ul li {
-	display: inline;
-	height: 104px;
-	line-height: 50px;
-	list-style: none outside none;
-	margin: 0.6em;
-	padding: 0;
+// Styling for listing av brukere 
+.view-user-list	.item-list ul {
+  text-align: center;
+  
+   li {
+	  display: inline;
+	  height: 104px;
+	  line-height: 50px;
+	  list-style: none outside none;
+	  margin: 0.6em;
+	  padding: 0;
+  }
 }
