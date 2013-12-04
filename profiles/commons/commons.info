@@ -50,6 +50,7 @@ dependencies[] = paranoia
 dependencies[] = pathauto
 dependencies[] = placeholder
 dependencies[] = privatemsg
+dependencies[] = privatemsg_realname
 dependencies[] = quicktabs
 dependencies[] = r4032login
 dependencies[] = libraries
@@ -104,9 +105,9 @@ dependencies[] = commons_wysiwyg
 dependencies[] = commons_social_sharing
 dependencies[] = commons_trusted_contacts
 
-; Information added by drupal.org packaging script on 2013-08-19
-version = "7.x-3.3"
+; Information added by drupal.org packaging script on 2013-10-17
+version = "7.x-3.4"
 core = "7.x"
 project = "commons"
-datestamp = "1376951283"
+datestamp = "1382042464"
 

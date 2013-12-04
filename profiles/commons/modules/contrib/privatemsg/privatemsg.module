@@ -63,6 +63,15 @@ function privatemsg_permission() {
 }
 
 /**
+ * Implements hook_modules_enabled().
+ */
+function privatemsg_modules_enabled($modules) {
+  if (in_array('realname', $modules)) {
+    module_enable(array('privatemsg_realname'));
+  }
+}
+
+/**
  * Generate array of user objects based on a string.
  *
  *

@@ -335,3 +335,13 @@ function privatemsg_update_7006() {
   variable_set("date_format_privatemsg_current_year", 'M j');
   variable_set("date_format_privatemsg_years", 'n/j/y');
 }
+
+/**
+ * Enable the privatemsg_realname module to fix issue #2077223
+ */
+function privatemsg_update_7007() {
+  if (module_exists('realname')) {
+    module_enable(array('privatemsg_realname'));
+    return array();
+  }
+}

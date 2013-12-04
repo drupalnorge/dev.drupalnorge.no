@@ -33,10 +33,7 @@ function ctools_token_content_type_content_type($subtype) {
  */
 function ctools_token_content_type_content_types() {
   // This will hold all the properties.
-  $types = &drupal_static(__FUNCTION__, array());
-  if (!empty($types)) {
-    return $types;
-  }
+  $types = array();
   $info = token_info();
 
   foreach ($info['tokens'] as $entity_type => $tokens) {

@@ -128,9 +128,10 @@ function apachesolr_user_search_execute($keys = NULL, $conditions = NULL) {
  */
 function apachesolr_user_result($doc, &$result, &$extra) {
   //not good performance, but the results look good.
-  $user = user_load($doc->entity_id);
-  $user_profile = user_view($user, 'search_result');
-  $result['snippet'] = drupal_render($user_profile);
+  if ($user = user_load($doc->entity_id)) {
+    $user_profile = user_view($user, 'search_result');
+    $result['snippet'] = drupal_render($user_profile);
+  }
 }
 
 /**

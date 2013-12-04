@@ -13,7 +13,7 @@ projects[addressfield_tokens][version] = "1.3"
 
 projects[acquia_connector][type] = "module"
 projects[acquia_connector][subdir] = "contrib"
-projects[acquia_connector][version] = "2.10"
+projects[acquia_connector][version] = "2.12"
 
 projects[advancedqueue][type] = "module"
 projects[advancedqueue][subdir] = "contrib"
@@ -41,6 +41,10 @@ projects[apachesolr_user][download][url] = "http://git.drupal.org/project/apache
 projects[apachesolr_user][download][branch] = "7.x-1.x"
 projects[apachesolr_user][download]revision] = "a86c5aebfceaf4a3fc53544762a36ca1b70809d5"
 
+; Check the user object before trying to display a result
+; https://drupal.org/node/2077281#comment-7807937
+projects[apachesolr_user][patch][] = "http://drupal.org/files/2077281-apache-solr-user-check-3.patch"
+
 projects[breakpoints][type] = "module"
 projects[breakpoints][subdir] = "contrib"
 projects[breakpoints][version] = "1.1"
@@ -55,7 +59,14 @@ projects[ckeditor][version] = "1.13"
 
 projects[ctools][type] = "module"
 projects[ctools][subdir] = "contrib"
-projects[ctools][version] = "1.3"
+projects[ctools][download][type] = "git"
+projects[ctools][download][url] = "http://git.drupal.org/project/ctools.git"
+projects[ctools][download][branch] = "7.x-1.x"
+projects[ctools][download][revision] = "e81da7a57f63ca95d2c713afcec65a5659aada9e"
+
+; Introduce UUIDs onto panes & displays.
+; http://drupal.org/node/1277908#comment-7216356
+projects[ctools][patch][] = "http://drupal.org/files/ctools-uuids_for_exported_objects-1277908-118.patch"
 
 projects[custom_search][type] = "module"
 projects[custom_search][subdir] = "contrib"
@@ -94,10 +105,6 @@ projects[entity][type] = "module"
 projects[entity][subdir] = "contrib"
 projects[entity][version] = "1.2"
 
-; Force LANGUAGE_NONE entities to still display within rendered entities.
-; http://drupal.org/node/1782134
-projects[entity][patch][] = "http://drupal.org/files/entity-translatable_fields_not_overriding_und_with_empty_values.patch"
-
 projects[entitycache][type] = "module"
 projects[entitycache][subdir] = "contrib"
 projects[entitycache][download][type] = "git"
@@ -105,12 +112,20 @@ projects[entitycache][download][url] = "http://git.drupal.org/project/entitycach
 projects[entitycache][download][branch] = "7.x-1.x"
 projects[entitycache][download][revision] = "7e390b5"
 
+; Fix core translation support.
+; http://drupal.org/node/1349566#comment-7781063
+projects[entitycache][patch][] = "http://drupal.org/files/add-translation-information-on-each-request-1349566-12.patch"
+
 projects[entityreference][type] = "module"
 projects[entityreference][subdir] = "contrib"
 projects[entityreference][download][type] = "git"
 projects[entityreference][download][url] = "http://git.drupal.org/project/entityreference.git"
 projects[entityreference][download][branch] = "7.x-1.x"
 projects[entityreference][download][revision] = "1c176daef3e7483389cbebeb34784b3af6521f7f"
+
+projects[entity_translation][type] = "module"
+projects[entity_translation][subdir] = "contrib"
+projects[entity_translation][version] = "1.0-beta3"
 
 ; Profile has no recommended release
 projects[edit_profile][type] = "module"
@@ -123,11 +138,7 @@ projects[entityreference_prepopulate][version] = "1.3"
 
 projects[features][type] = "module"
 projects[features][subdir] = "contrib"
-projects[features][version] = "2.0-rc2"
-
-; Issue #1921982: Add 'customized' to the fields we check when comparing a menu_link feature
-; http://drupal.org/node/1921982
-projects[features][patch][] = "http://drupal.org/files/menu_links_customized-927576-8.patch"
+projects[features][version] = "2.0-rc5"
 
 projects[flag][type] = "module"
 projects[flag][subdir] = "contrib"
@@ -136,6 +147,10 @@ projects[flag][version] = "2.1"
 ; Issue #1965760: Manually set taxonomy term flag types because its different.
 ; http://drupal.org/node/1965760
 projects[flag][patch][] = "http://drupal.org/files/1965760-flag-taxonomy-types.patch"
+
+; Issue #1971980: Features export does not take flag_definition_alter into account.
+; http://drupal.org/node/1971980
+projects[flag][patch][] = "http://drupal.org/files/flag-features_export-1971980-3.patch"
 
 projects[flag_abuse][type] = "module"
 projects[flag_abuse][subdir] = "contrib"
@@ -149,6 +164,17 @@ projects[http_client][type] = "module"
 projects[http_client][subdir] = "contrib"
 projects[http_client][version] = "2.4"
 
+projects[i18n][type] = "module"
+projects[i18n][subdir] = "contrib"
+projects[i18n][version] = "1.10"
+
+projects[i18nviews][type] = "module"
+projects[i18nviews][subdir] = "contrib"
+projects[i18nviews][download][type] = "git"
+projects[i18nviews][download][url] = "http://git.drupal.org/project/i18nviews.git"
+projects[i18nviews][download][branch] = "7.x-3.x"
+projects[i18nviews][download][revision] = "26bd52c"
+
 projects[admin_icons][type] = "module"
 projects[admin_icons][subdir] = "contrib"
 projects[admin_icons][download][type] = "git"
@@ -156,9 +182,21 @@ projects[admin_icons][download][url] = "http://git.drupal.org/project/admin_icon
 projects[admin_icons][download][branch] = "7.x-1.x"
 projects[admin_icons][download][revision] = "60d9f28801533fecc92216a60d444d89d80e7611"
 
+projects[kissmetrics][type] = "module"
+projects[kissmetrics][subdir] = "contrib"
+projects[kissmetrics][version] = "1.0-rc3"
+
+projects[l10n_update][type] = "module"
+projects[l10n_update][subdir] = "contrib"
+projects[l10n_update][version] = "1.0-beta3"
+
 projects[libraries][type] = "module"
 projects[libraries][subdir] = "contrib"
 projects[libraries][version] = "2.1"
+
+projects[lingotek][type] = "module"
+projects[lingotek][subdir] = "contrib"
+projects[lingotek][version] = "4.06"
 
 projects[link][type] = "module"
 projects[link][subdir] = "contrib"
@@ -176,12 +214,13 @@ projects[message][version] = "1.9"
 ; http://drupal.org/node/1920560#comment-7080942
 projects[message][patch][] = "http://drupal.org/files/1920560-message-access-alterable.patch"
 
+; Add support for the undefined language.
+; http://drupal.org/node/2006702#comment-7842259
+projects[message][patch][] = "http://drupal.org/files/message_field_undefined-lang.2006702-14.patch"
+
 projects[message_notify][type] = "module"
 projects[message_notify][subdir] = "contrib"
-projects[message_notify][download][type] = "git"
-projects[message_notify][download][url] = "http://git.drupal.org/project/message_notify.git"
-projects[message_notify][download][branch] = "7.x-2.x"
-projects[message_notify][download][revision] = "e546b0a6e3d2dfd48f4fd3a4d45806c066c9a9bc"
+projects[message_notify][version] = "2.5"
 
 projects[message_subscribe][type] = "module"
 projects[message_subscribe][subdir] = "contrib"
@@ -258,6 +297,10 @@ projects[panels][patch][] = "http://drupal.org/files/1828684-layout-fix-6.patch"
 ; http://drupal.org/node/1632898#comment-6412840
 projects[panels][patch][] = "http://drupal.org/files/panels-n1632898-15.patch"
 
+; Add internationalization support.
+; http://drupal.org/node/1179034#comment-7216342
+projects[panels][patch][] = "http://drupal.org/files/panels-1179034-41_____panels-uuids-127790-100__-80.patch"
+
 projects[paranoia][type] = "module"
 projects[paranoia][subdir] = "contrib"
 projects[paranoia][version] = "1.2"
@@ -274,6 +317,10 @@ projects[pm_existing_pages][type] = "module"
 projects[pm_existing_pages][subdir] = "contrib"
 projects[pm_existing_pages][version] = "1.4"
 
+projects[potx][type] = "module" 
+projects[potx][subdir] = "contrib"
+projects[potx][version] = "1.0"
+
 projects[privatemsg][type] = "module"
 projects[privatemsg][subdir] = "contrib"
 projects[privatemsg][version] = "1.4"
@@ -282,12 +329,14 @@ projects[privatemsg][version] = "1.4"
 ; http://drupal.org/node/1573000
 projects[privatemsg][patch][] = "http://drupal.org/files/privatemsg-1573000-64.patch"
 
+; Enable privatemsg_realname when realname is enabled
+; https://drupal.org/node/2070719
+projects[privatemsg][patch][] = "http://drupal.org/files/2077223-privatemsg-realname-enabled-1.patch"
+
 projects[quicktabs][type] = "module"
 projects[quicktabs][subdir] = "contrib"
-projects[quicktabs][download][type] = "git"
-projects[quicktabs][download][url] = "http://git.drupal.org/project/quicktabs.git"
-projects[quicktabs][download][branch] = "7.x-3.x"
-projects[quicktabs][download][revision] = "89f7fd0b7313782d0f7504996daa36bde798ec79"
+projects[quicktabs][version] = "3.6"
+projects[quicktabs][patch][] = "http://drupal.org/files/2104643-revert-qt-487518-5.patch"
 
 projects[radioactivity][type] = "module"
 projects[radioactivity][subdir] = "contrib"
@@ -302,7 +351,7 @@ projects[radioactivity][patch][] = "http://drupal.org/files/radioactivity-memcac
 
 projects[r4032login][type] = "module"
 projects[r4032login][subdir] = "contrib"
-projects[r4032login][version] = "1.5"
+projects[r4032login][version] = "1.6"
 
 projects[rate][type] = "module"
 projects[rate][subdir] = "contrib"
@@ -322,7 +371,10 @@ projects[registration][version] = "1.2"
 
 projects[rules][type] = "module"
 projects[rules][subdir] = "contrib"
-projects[rules][version] = "2.3"
+projects[rules][download][type] = "git"
+projects[rules][download][url] = "http://git.drupal.org/project/rules.git"
+projects[rules][download][branch] = "7.x-2.x"
+projects[rules][download][revision] = "8db91e5"
 
 projects[search_facetapi][type] = "module"
 projects[search_facetapi][subdir] = "contrib"
@@ -357,11 +409,7 @@ projects[strongarm][download][revision] = "5a2326ba67e59923ecce63d9bb5e0ed6548ab
 
 projects[timeago][type] = "module"
 projects[timeago][subdir] = "contrib"
-projects[timeago][version] = "2.x-dev"
-projects[timeago][download][type] = "git"
-projects[timeago][download][url] = "http://git.drupal.org/project/timeago.git"
-projects[timeago][download][branch] = "7.x-2.x"
-projects[timeago][download][revision] = "768ea66"
+projects[timeago][version] = "2.2"
 
 ; Provide a dedicated date type:
 ; http://drupal.org/node/1427226#comment-6638836
@@ -371,9 +419,17 @@ projects[title][type] = "module"
 projects[title][subdir] = "contrib"
 projects[title][version] = "1.0-alpha7"
 
+projects[translation_helpers][type] = "module"
+projects[translation_helpers][subdir] = "contrib"
+projects[translation_helpers][version] = "1.0"
+
 projects[token][type] = "module"
 projects[token][subdir] = "contrib"
 projects[token][version] = "1.5"
+
+projects[variable][type] = "module"
+projects[variable][subdir] = "contrib"
+projects[variable][version] = "2.3"
 
 projects[views][type] = "module"
 projects[views][subdir] = "contrib"
@@ -400,97 +456,16 @@ projects[votingapi][version] = "2.11"
 projects[votingapi][type] = "module"
 projects[votingapi][subdir] = "contrib"
 
-; Commons contrib modules.
-; We don't tag a release here because want them to auto-increment.
-projects[commons_activity_streams][type] = "module"
-projects[commons_activity_streams][subdir] = "contrib"
+projects[voting_rules][type] = "module"
+projects[voting_rules][subdir] = "contrib"
+projects[voting_rules][version] = "1.0-alpha1"
 
-projects[commons_body][type] = "module"
-projects[commons_body][subdir] = "contrib"
-
-projects[commons_bw][type] = "module"
-projects[commons_bw][subdir] = "contrib"
-
-projects[commons_content_moderation][type] = "module"
-projects[commons_content_moderation][subdir] = "contrib"
-
-projects[commons_documents][type] = "module"
-projects[commons_documents][subdir] = "contrib"
-
-projects[commons_groups][type] = "module"
-projects[commons_groups][subdir] = "contrib"
-
-projects[commons_events][type] = "module"
-projects[commons_events][subdir] = "contrib"
-
-projects[commons_featured][type] = "module"
-projects[commons_featured][subdir] = "contrib"
-
-projects[commons_follow][type] = "module"
-projects[commons_follow][subdir] = "contrib"
-
-projects[commons_location][type] = "module"
-projects[commons_location][subdir] = "contrib"
-
-projects[commons_misc][type] = "module"
-projects[commons_misc][subdir] = "contrib"
-
-projects[commons_notices][type] = "module"
-projects[commons_notices][subdir] = "contrib"
-
-projects[commons_notify][type] = "module"
-projects[commons_notify][subdir] = "contrib"
-
-projects[commons_pages][type] = "module"
-projects[commons_pages][subdir] = "contrib"
-
-projects[commons_posts][subdir] = "contrib"
-projects[commons_posts][type] = "module"
-
-projects[commons_polls][type] = "module"
-projects[commons_polls][subdir] = "contrib"
-
-projects[commons_profile_base][type] = "module"
-projects[commons_profile_base][subdir] = "contrib"
-
-projects[commons_profile_social][type] = "module"
-projects[commons_profile_social][subdir] = "contrib"
-
-projects[commons_q_a][type] = "module"
-projects[commons_q_a][subdir] = "contrib"
-
-projects[commons_radioactivity][type] = "module"
-projects[commons_radioactivity][subdir] = "contrib"
-
-projects[commons_like][type] = "module"
-projects[commons_like][subdir] = "contrib"
-
-projects[commons_search][type] = "module"
-projects[commons_search][subdir] = "contrib"
-
-projects[commons_social_sharing][type] = "module"
-projects[commons_social_sharing][subdir] = "contrib"
-
-projects[commons_site_homepage][type] = "module"
-projects[commons_site_homepage][subdir] = "contrib"
-
-projects[commons_trusted_contacts][type] = "module"
-projects[commons_trusted_contacts][subdir] = "contrib"
-
-projects[commons_utility_links][type] = "module"
-projects[commons_utility_links][subdir] = "contrib"
-
-projects[commons_user_profile_pages][type] = "module"
-projects[commons_user_profile_pages][subdir] = "contrib"
-
-projects[commons_wikis][type] = "module"
-projects[commons_wikis][subdir] = "contrib"
-
-projects[commons_wysiwyg][type] = "module"
-projects[commons_wysiwyg][subdir] = "contrib"
-
-projects[commons_topics][type] = "module"
-projects[commons_topics][subdir] = "contrib"
+; Registry Rebuild
+; We can probably remove this later, but for now keep it included
+; See https://drupal.org/node/1983606#comment-7788313 for more information.
+projects[registry_rebuild][version] = "1.10"
+projects[registry_rebuild][type] = "module"
+projects[registry_rebuild][subdir] = "contrib"
 
 ; Contributed themes.
 
@@ -499,7 +474,7 @@ projects[adaptivetheme][subdir] = "contrib"
 projects[adaptivetheme][download][type] = "git"
 projects[adaptivetheme][download][url] = "http://git.drupal.org/project/adaptivetheme.git"
 projects[adaptivetheme][download][branch] = "7.x-3.x"
-projects[adaptivetheme][download][revision] = "b4b38c3"
+projects[adaptivetheme][download][revision] = "b4b38c3c01d066e733c2942020c51962cd64231c"
 
 ; Remove link around comment creation date.
 ; http://drupal.org/node/1427226#comment-6638836
@@ -508,9 +483,6 @@ projects[adaptivetheme][patch][] = "http://drupal.org/files/remove-comment-creat
 projects[sky][type] = "theme"
 projects[sky][subdir] = "contrib"
 projects[sky][version] = "3.0-rc1"
-
-projects[commons_origins][type] = "theme"
-projects[commons_origins][subdir] = "contrib"
 
 ; Libraries.
 ; NOTE: These need to be listed in http://drupal.org/packaging-whitelist.
@@ -523,7 +495,7 @@ libraries[backbone][type] = "libraries"
 libraries[backbone][download][url] = "https://github.com/jashkenas/backbone/archive/1.0.0.tar.gz"
 
 libraries[ckeditor][download][type] = "get"
-libraries[ckeditor][download][url] = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.0/ckeditor_4.0_standard.tar.gz"
+libraries[ckeditor][download][url] = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.0/ckeditor_4.0_full.tar.gz"
 libraries[ckeditor][type] = "libraries"
 
 libraries[placeholder][download][type] = "get"

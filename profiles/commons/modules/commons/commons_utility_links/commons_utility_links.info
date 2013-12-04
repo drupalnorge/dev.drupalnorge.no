@@ -1,0 +1,9 @@
+core = 7.x
+name = Commons Utility links block
+package = "Commons - Building blocks"
+; Information added by drupal.org packaging script on 2013-10-17
+version = "7.x-3.4"
+core = "7.x"
+project = "commons"
+datestamp = "1382042464"
+

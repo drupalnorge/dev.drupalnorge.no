@@ -1,0 +1,18 @@
+name = Commons Tabbed Browsing Widget
+core = 7.x
+package = Commons - Building blocks
+dependencies[] = features
+dependencies[] = quicktabs
+dependencies[] = quicktabs_tabstyles
+dependencies[] = title
+features[features_api][] = api:2
+features[field_base][] = title_field
+files[] = includes/views/handlers/commons_bw_handler_node_partial_form.inc
+; Views handlers
+
+; Information added by drupal.org packaging script on 2013-10-17
+version = "7.x-3.4"
+core = "7.x"
+project = "commons"
+datestamp = "1382042464"
+
