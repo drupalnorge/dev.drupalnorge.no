@@ -2,7 +2,6 @@ name = Commons Search
 description = Provide the global search block.
 core = 7.x
 package = Commons - Search
-project = commons_search
 dependencies[] = ctools
 dependencies[] = custom_search
 dependencies[] = features
@@ -62,9 +61,9 @@ features[variable][] = custom_search_type_selector_all
 features[variable][] = custom_search_type_selector_label
 features[variable][] = custom_search_type_selector_label_visibility
 features[views_view][] = group_search
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 

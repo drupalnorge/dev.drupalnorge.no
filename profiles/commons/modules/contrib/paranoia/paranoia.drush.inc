@@ -24,6 +24,7 @@ function paranoia_drush_sql_sync_sanitize($site) {
     dt('Remove history, which contains info on where users have browsed on a site.'),
     "TRUNCATE history;");
   // Since people may not enable the dblog module, ensure it exists first.
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_DATABASE);
   if (db_table_exists('watchdog')) {
     drush_sql_register_post_sync_op('watchdog',
       dt('Watchdog usually contains user id, IP, e-mail addresses, filesystem paths.'),

@@ -1,7 +1,6 @@
 name = Commons Documents
 core = 7.x
 package = Commons - Content types
-project = commons_documents
 dependencies[] = commons_body
 dependencies[] = commons_groups
 dependencies[] = commons_topics
@@ -46,9 +45,9 @@ features[variable][] = node_preview_document
 features[variable][] = node_submitted_document
 features[views_view][] = commons_bw_documents
 
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 

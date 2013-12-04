@@ -2,11 +2,8 @@ name = Commons Profile Base
 description = Provides a base set of profile fields for user profiles.
 core = 7.x
 package = Commons - Building blocks
-php = 5.2.4
-project = commons_profile_base
 dependencies[] = features
 dependencies[] = strongarm
-datestamp = 1346372016
 features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:1
 features[field_base][] = field_bio
@@ -21,9 +18,9 @@ features[variable][] = user_picture_file_size
 features[variable][] = user_picture_style
 features[variable][] = user_pictures
 
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 

@@ -19,8 +19,16 @@ function paranoia_form_system_modules_alter(&$form, &$form_state) {
   foreach ($hidden_modules as $module => $package) {
     // Unset instead of using #access because #access => FALSE shows an empty
     // table row.
-    unset($form['modules'][$package][$module]);
+    if (isset($form['modules'][$module])) {
+      unset($form['modules'][$module]);
+    }
+    // Adds support for module_filter.
+    if (isset($form['modules'][$package][$module])) {
+      unset($form['modules'][$package][$module]);
+    }
   }
+  // Invoke custom validation function to disable banned modules on submit
+  $form['#validate'][] = 'paranoia_module_validate';
 }
 
 /**
@@ -135,6 +143,15 @@ function paranoia_permissions_submit($form, &$form_state) {
 }
 
 /**
+ * Implements hook_paranoia_disable_modules().
+ */
+function paranoia_paranoia_disable_modules() {
+  return array(
+    'php',
+  );
+}
+
+/**
  * Implements hook_paranoia_hide_permissions().
  *
  * On behalf of Drupal Core.
@@ -204,3 +221,32 @@ function auto_nodetitle_paranoia_hide_permissions() {
   return array('use PHP for title patterns');
 }
 
+/**
+ * Custom validation function to make sure php_filter can't be enabled.
+ */
+function paranoia_module_validate($form, &$form_state) {
+  $disabled_modules = module_invoke_all('paranoia_disable_modules');
+  foreach ($disabled_modules as $module) {
+    if (module_exists($module)) {
+      drupal_set_message(t('You attempted to enable %module which is not allowed on this site.',
+        array('%module' => $module)));
+      module_disable(array($module));
+    }
+  }
+}
+
+/**
+ * Implements hook_paranoia_hide_permissions().
+ * On behalf of visual_website_optimizer.module.
+ */
+function visual_website_optimizer_paranoia_hide_permissions() {
+  return array('use PHP for filtering condition');
+}
+
+/**
+  * Implements hook_paranoia_hide_permissions().
+  * On behalf of live_person.module.
+  */
+function live_person_paranoia_hide_permissions() {
+  return array('use PHP for live person visibility');
+}

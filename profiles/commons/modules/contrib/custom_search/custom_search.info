@@ -7,9 +7,9 @@ dependencies[] = search
 
 configure = admin/config/search/custom_search
 
-; Information added by drush on 2013-10-17
+; Information added by drush on 2013-11-22
 version = "7.x-1.12+1-dev"
 core = "7.x"
 project = "custom_search"
-datestamp = "1382042553"
+datestamp = "1385164742"
 

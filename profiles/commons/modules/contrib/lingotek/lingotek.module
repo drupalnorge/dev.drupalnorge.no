@@ -258,6 +258,14 @@ function lingotek_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items[LINGOTEK_MENU_MAIN_BASE_URL . '/manage/change-workflow/%'] = array(
+    'access arguments' => array('administer lingotek'),
+    'file' => 'lingotek.bulk_grid.inc',
+    'page callback' => 'lingotek_change_workflow',
+    'page arguments' => array(5),
+    'type' => MENU_CALLBACK,
+  );
+
   $items[LINGOTEK_MENU_MAIN_BASE_URL . '/manage/reset/%'] = array(
     'access arguments' => array('administer lingotek'),
     'file' => 'lingotek.page.inc',
@@ -337,12 +345,12 @@ function lingotek_menu() {
     'access arguments' => array('administer lingotek')
   );
 
-  $items['admin/config/lingotek/community-settings-select'] = array(
+  $items['admin/config/lingotek/project-vault-select'] = array(
     'title' => 'Choose Your Project, Workflow, and TM Vault',
-    'description' => 'Select project, workflow, and TM vault to use.',
+    'description' => 'Select project, workflow, and translation memory vault to use.',
     'file' => 'lingotek.setup.inc',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('lingotek_community_settings_select_form'),
+    'page arguments' => array('lingotek_project_vault_select_form'),
     'type' => MENU_CALLBACK,
     'access arguments' => array('administer lingotek')
   );
@@ -582,25 +590,13 @@ function lingotek_form_node_form_alter(&$form, $form_state, $form_id) {
   }
   $is_enterprise = LingotekAccount::instance()->isEnterprise();
 
-  //$translation_edit_link = l(lingotek_language_field_lookup('native', $lingotek_locale), '', array('attributes' => array('onclick' => 'window.open(\'' . lingotek_get_workbench_url($node, $lingotek_locale) . '\'); return false;')));
-
-
-  $node = lingotek_empty_node();
-  $document_id = FALSE;
   if (isset($form['nid']['#value'])) {
     $nid = $form['nid']['#value'];
     $node = lingotek_node_load_default($nid);
-    $document_id = isset($node->lingotek['document_id']) ? $node->lingotek['document_id'] : '';
   }
   else {
     $node = $form['#node'];
-    $profile_default = lingotek_load_profile_defaults('node');
-    $node->lingotek = lingotek_get_global_profile();
-    if(isset($profile_default[$node->type])) {
-      $node->lingotek = array_merge($node->lingotek, $profile_default[$node->type]);
-    } else {
-      $node->lingotek['profile'] = LingotekSync::PROFILE_DISABLED;
-    }
+    lingotek_node_load(array($node), array());
   }
     
   global $language;
@@ -622,12 +618,65 @@ function lingotek_form_node_form_alter(&$form, $form_state, $form_id) {
   }
 
   $form = array_merge($form, lingotek_get_node_settings_form($form, $form_state, $node));
-      
+ 
+  $api = LingotekApi::instance();
+
+  // show workflow-change option only if there are more than one workflow and if it's an existing node
+  $workflows = $api->listWorkflows();
+  if ($workflows && count($workflows) > 1) {
+    $form['lingotek']['workflow_id'] = array(
+      '#type' => 'select',
+      '#title' => t('Workflow'),
+      '#prefix' => '<div id="prefill-phases-div">',
+      '#description' => t('Choose the Workflow to associate with this content item.'),
+      '#default_value' => $node->lingotek['workflow_id'],
+      '#options' => $workflows,
+      '#empty_option' => '(select one)',
+    );
+    if (!$nid) { // don't show prefill stuff on new nodes 
+      $form['lingotek']['workflow_id']['#suffix'] = '</div>';
+    }
+    else {
+      // add the callback and checkbox and phase-select
+      $form['lingotek']['workflow_id']['#ajax'] = array(
+        'callback' => 'lingotek_get_change_workflow_form_callback',
+        'wrapper' => 'prefill-phases-div',
+        'method' => 'replace',
+        'effect' => 'fade',
+      );
+      $form['lingotek']['prefill_phases_checkbox'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Restore to a phase in the new workflow'),
+        '#default_value' => TRUE,
+        '#description' => t('Prefill the new workflow with translations from the previous workflow'),
+        '#states' => array(
+          'invisible' => array(':input[name="lingotek[workflow_id]"]' => array('value' => $node->lingotek['workflow_id'])),
+        )
+      );
+
+      $form['lingotek']['prefill_phase_select'] = array(
+        '#title' => t("Desired Prefill Phase"),
+        '#description' => t('Please select the highest phase which should be prefilled for the new workflow'),
+        '#type' => 'select',
+        '#states' => array(
+            'visible' => array(':input[name="lingotek[workflow_id]"]' => array('!value' => $node->lingotek['workflow_id']),
+                           array(':input[name="lingotek[prefill_phases_checkbox]"]' => array('checked' => TRUE))),
+          ),
+        '#suffix' => '</div>',
+      );
+      if (isset($form_state['values']['lingotek']['workflow_id']) && $form_state['values']['lingotek']['workflow_id'] != NULL) {
+        $form['lingotek']['prefill_phase_select']['#options'] = lingotek_get_phases_by_workflow_id($form_state['values']['lingotek']['workflow_id']);
+      }
+      else {
+        $form['lingotek']['prefill_phase_select']['#options'] = array('-1' => '(first choose a workflow)');
+        $form['lingotek']['prefill_phase_select']['#disabled'] = TRUE;
+      }
+    }
+  }    
+  
   if ($is_enterprise) {
     // Only show these options if the Lingotek document hasn't yet been created.
-    if (!$document_id && class_exists('LingotekApi')) {
-
-      $api = LingotekApi::instance();
+    if (!$node->lingotek['document_id'] && class_exists('LingotekApi')) {
 
       // Available projects.
       if ($projects = $api->listProjects()) {
@@ -638,17 +687,6 @@ function lingotek_form_node_form_alter(&$form, $form_state, $form_id) {
           '#description' => t('Select the translation project with which this item should be associated.'),
           '#default_value' => $node->lingotek['project_id'],
           '#options' => $projects,
-        );
-      }
-
-      // Workflows.
-      if ($workflows = $api->listWorkflows()) {
-        $form['lingotek']['workflow_id'] = array(
-          '#type' => 'select',
-          '#title' => t('Workflow'),
-          '#description' => t('Choose the Workflow to associate with this content item.'),
-          '#default_value' => $node->lingotek['workflow_id'],
-          '#options' => $workflows,
         );
       }
 
@@ -681,7 +719,7 @@ function lingotek_form_node_form_alter(&$form, $form_state, $form_id) {
     '#type' => 'textfield',
     '#title' => t('Document Id'),
     '#description' => t("Read/Overwrite the document ID associated with the document.  This can break the translation process but can also be used to help figure out if something is wrong."),
-    '#default_value' => ($document_id === False) ? '' : $document_id,
+    '#default_value' => $node->lingotek['document_id'],
   );
   $form['lingotek']['advanced']['current_lingonode'] = array(
     '#type' => 'textarea',
@@ -707,7 +745,7 @@ function lingotek_get_node_settings_form($form, &$form_state, $node = NULL) {
       $node = lingotek_node_load_default(reset($nids));
     }
     else {
-      if(!$second_run) {
+      if (!$second_run) {
         drupal_set_message(t('You will be changing the settings for @number nodes.', array('@number' => count($nids))), 'warning');
       }
       $node = new stdClass();
@@ -783,7 +821,7 @@ function lingotek_get_node_settings_form($form, &$form_state, $node = NULL) {
     '#default_value' => $node->lingotek['profile'],
   );
   
-  if($node->lingotek['node_sync_status'] == LingotekSync::STATUS_DISABLED) {
+  if ($node->lingotek['node_sync_status'] == LingotekSync::STATUS_DISABLED) {
     $form['lingotek']['profile']['#default_value'] = LingotekSync::PROFILE_DISABLED;
   }
   
@@ -916,6 +954,10 @@ function lingotek_get_node_settings_form($form, &$form_state, $node = NULL) {
  */
 function lingotek_node_save($node) {
 
+  if (!isset($node->lingotek)) {
+    // load default lingotek settings when alternate node creation paths are employed (e.g., commons)
+    lingotek_node_load(array($node), array());
+  }
   $has_not_been_uploaded = !isset($node->lingotek['document_id']) || empty($node->lingotek['document_id']);
   
   $disabled_selected = ($node->lingotek['profile'] == LingotekSync::PROFILE_DISABLED);
@@ -923,7 +965,7 @@ function lingotek_node_save($node) {
   if ($disabled_selected && !$disabled) {
     LingotekSync::setNodeEnabled($node->nid, FALSE);
   }
-  else if (!$disabled_selected && $disabled) {
+  elseif (!$disabled_selected && $disabled) {
     LingotekSync::setNodeEnabled($node->nid, TRUE);
   }
   
@@ -936,7 +978,14 @@ function lingotek_node_save($node) {
     ->execute();
 
   if ($node->lingotek['profile'] == LingotekSync::PROFILE_CUSTOM) {
-    $ignore = array('et_content', 'lingotek_push_once', 'lingotek_disabled', 'advanced', 'node_sync_status', 'document_id');
+    $ignore = array('et_content', 
+                    'lingotek_push_once', 
+                    'lingotek_disabled', 
+                    'advanced', 
+                    'node_sync_status', 
+                    'document_id',
+                    'prefill_phases_checkbox',
+                    'prefill_phase_select');
     $query = db_insert('lingotek')->fields(array('nid', 'lingokey', 'lingovalue'));
     
     foreach ($node->lingotek as $key => $value) {
@@ -945,13 +994,28 @@ function lingotek_node_save($node) {
       }
     }
     $query->execute();
+    
+    // check for a workflow change
+    if (isset($node->lingotek['workflow_id']) && isset($node->lingotek['advanced']['document_id'])) {
+      $curr_workflow = $node->lingotek['workflow_id'];
+      $document_id = $node->lingotek['advanced']['document_id'];
+      if (!isset($node->original->lingotek['workflow_id']) ||
+          $node->original->lingotek['workflow_id'] != $curr_workflow) {
+        $api = LingotekApi::instance();
+        $prefill_checked = (isset($node->lingotek['prefill_phases_checkbox']) ? $node->lingotek['prefill_phases_checkbox'] : NULL);
+        $prefill_phase = ($prefill_checked ? $node->lingotek['prefill_phase_select'] : NULL);
+        $result = $api->changeWorkflow(array($document_id), $curr_workflow, $prefill_phase);
+        LingotekSync::setAllTargetStatus($node->nid, LingotekSync::STATUS_PENDING);
+        }
+    }
   }
   else { // Specific Profile
     $node_defaults = lingotek_load_profile_defaults('node');
     $profile_overridden = (!isset($node_defaults[$node->type]['profile']) || $node_defaults[$node->type]['profile'] != $node->lingotek['profile']);
-    if($profile_overridden) {
+    if ($profile_overridden) {
       lingotek_lingonode($node->nid, 'profile', $node->lingotek['profile']);
-    } else {
+    }
+    else {
       lingotek_lingonode_variable_delete($node->nid, 'profile');
     }
   }
@@ -976,43 +1040,41 @@ function lingotek_node_save_readonly($node) {
 function lingotek_get_node_settings_form_submit($form, $form_state) {
   if (isset($form_state['nids']) && !empty($form_state['nids'])) {
     $nids = $form_state['nids'];
+
+    // YOU LEFT OFF HERE, SEND UP THE CALL TO UPDATE THE WORKFLOW_ID FOR EACH NODE ALREADY UPLOADED
     
-    foreach($nids as $nid) {
+    foreach ($nids as $nid) {
       $node = node_load($nid);
       $node->lingotek = array_replace($node->lingotek, $form_state['values']['lingotek']);
       node_save($node);
     }
-    
-//    $operations = array();
-//    foreach ($nids as $nid) {
-//      $operations[] = array('lingotek_update_node_settings', array($form_state['values']['lingotek'], array($nid)));
-//      $operations[] = array('LingotekSync::setNodeEnabled', array($nid, $enabled));
-//    }
+  }
+}
 
-  /*  $segment = array(); // This way is almost twice as fast, but doesn't show how many nodes are being operated on.
-    $offset = 0;
-    do {
-      $segment = array_slice($nids, $offset, 100, TRUE);
-      $operations[] = array('lingotek_update_node_settings', array($settings, $segment));
-      $offset += 100;
-    } while (count($segment) >= 100);
-*/
-    
-//    $batch = array(
-//      'title' => t('Updating Lingotek Node Settings'),
-//      'operations' => $operations,
-//    );
-//
-//    $redirect = 'admin/settings/lingotek/grid';
+function lingotek_get_change_workflow_form_submit($form, $form_state) {
+  if (isset($form_state['nids']) && !empty($form_state['nids'])) {
+    $nids = $form_state['nids'];
+    $workflow_id = $form_state['values']['lingotek']['workflow_id'];
+    if (isset($form_state['values']['lingotek']['prefill_phases_checkbox']) && $form_state['values']['lingotek']['prefill_phases_checkbox']) {
+      $prefill_phase = $form_state['values']['lingotek']['prefill_phase_select'];
+    }
+    else {
+      $prefill_phase = NULL;
+    }
 
-//    batch_set($batch);
-//    batch_process($redirect);
-    
-    //We cannot do batch operations here anymore because it is now in modal window, so we will emulate the process.
-    //As long as we aren't affecting hundreds of nodes we should be fine.
-//    foreach ($operations as $op) {
-//      call_user_func_array($op[0], $op[1]);
-//    }
+    // SUBMIT THE WORKFLOW CHANGES TO TMS
+    $document_ids = LingotekSync::getDocIdsFromNodeIds($nids);
+    if (!$document_ids) {
+      return;
+    }
+    $api = LingotekApi::instance();
+    $api->changeWorkflow($document_ids, $workflow_id, $prefill_phase);
+
+    // CREATE/UPDATE WORKFLOW ENTRIES IN THE LINGOTEK METADATA TABLE
+    foreach ($nids as $nid) {
+      lingotek_lingonode($nid, 'workflow_id', $workflow_id);
+      LingotekSync::setAllTargetStatus($nid, LingotekSync::STATUS_PENDING);
+    }
   }
 }
 
@@ -1067,7 +1129,7 @@ function lingotek_node_view($node, $view_mode) {
     if ($language->language != $node->language) {
       $link = lingotek_get_workbench_url($node->lingotek['document_id'], $language->lingotek_locale, t('Help make it better.'));
       if ($link != '') {
-        $message = t('The translation of @title is still being worked on.', array('@title' => '"' . $node->title . '"')) . " ";
+        $message = t('The translation of this page is still being worked on.') . " ";
         $message .= $link . '&nbsp;';
         if (lingotek_access($node, 'manage projects')) {
           $message .= '<span style="font-size: 80%">[' . l(t('progress'), 'node/' . $node->nid . '/lingotek_pm', array('html' => TRUE)) . ']</span>';
@@ -1118,7 +1180,8 @@ function lingotek_node_delete($node) {
 function lingotek_entity_load_single($entity_type, $entity_id) {
   if ($entity_type == 'node') {
     $entity = lingotek_node_load_default($entity_id);
-  } else {
+  }
+  else {
     $entities = entity_load($entity_type, array($entity_id));
     $entity = $entities[$entity_id];
   }
@@ -1169,11 +1232,11 @@ function lingotek_node_load($nodes, $types) {
       $node->lingotek = array_merge($node->lingotek, $node_profile_defaults[$node->type]);
     }
     // Step 3: add node-specific profile
-    if (isset($node_lingovalues[$node->nid]['profile']) && is_numeric($node_lingovalues[$node->nid]['profile'])) {
+    if (isset($node->nid) && isset($node_lingovalues[$node->nid]['profile']) && is_numeric($node_lingovalues[$node->nid]['profile'])) {
       $node->lingotek = array_merge($node->lingotek, $profiles_list[$node_lingovalues[$node->nid]['profile']]);
     }
     // Step 4: add node-specific overrides
-    if (isset($node_lingovalues[$node->nid])) {
+    if (isset($node->nid) && isset($node_lingovalues[$node->nid])) {
       $node->lingotek = array_merge($node->lingotek, $node_lingovalues[$node->nid]);
     }
     // Step 5: if no profile, then disabled.
@@ -1214,7 +1277,7 @@ function lingotek_node_update($node) {
     return;
   }
   //check to make sure it is not a target node
-  if(!empty($node->tnid) && ($node->nid != $node->tnid)) {
+  if (!empty($node->tnid) && ($node->nid != $node->tnid)) {
     return;
   }
   
@@ -1223,7 +1286,8 @@ function lingotek_node_update($node) {
   if (module_exists('workbench_moderation') && isset($node->workbench_moderation)) {
     if (isset($node->is_new) && $node->is_new) {
       lingotek_workbench_moderation_transition($node, $node->workbench_moderation['current']->from_state, $node->workbench_moderation['current']->state);
-    } else {
+    }
+    else {
       return;
     }
   }
@@ -1248,7 +1312,7 @@ function lingotek_upload_document($node) {
     lingotek_lingonode($node->nid, 'hash', $hash);
     $diff = strcmp($hash, $oldhash);
 
-    if($diff == 0 && $node->lingotek['node_sync_status'] == 'CURRENT') {
+    if ($diff == 0 && $node->lingotek['node_sync_status'] == 'CURRENT') {
       return; //node has no changes.
     }
   }
@@ -1475,7 +1539,7 @@ function lingotek_is_config_missing() {
         return 'admin/config/lingotek/community-select';
       }
       elseif ($required_variable == 'lingotek_project' || $required_variable == 'lingotek_workflow' || $required_variable == 'lingotek_vault') {
-        return 'admin/config/lingotek/community-settings-select';
+        return 'admin/config/lingotek/project-vault-select';
       }
       elseif ($required_variable == 'lingotek_enabled_fields') {
         return 'admin/config/lingotek/node-translation-settings';
@@ -1614,19 +1678,46 @@ function lingotek_entity_info_alter(&$entity_info) {
   }
 }
 
+function lingotek_normalize_field_collection_language($entity, $from_language_none = TRUE) {
+    $host = $entity->hostEntity();
+    $max_field_collection_depth = 10;
+    // bubble up to the true parent to get its language,
+    // which adds support for deeply nested entity collections
+    for ($i = 0; $i < $max_field_collection_depth; $i++) {
+      if ($host instanceof FieldCollectionItemEntity) {
+        $host = $host->hostEntity();
+      }
+    }
+    foreach ($entity as $key => $value) {
+      if (is_array($value) && array_key_exists(LANGUAGE_NONE, $value)) {
+        if ($from_language_none) {
+          $entity->{$key}[$host->language] = $value[LANGUAGE_NONE];
+        }
+        elseif (isset($value[$host->language])) {
+          $entity->{$key}[LANGUAGE_NONE] = $value[$host->language];
+        }
+      }
+    }
+}
+
+/**
+ * Implements hook_entity_load().
+  */
+function lingotek_entity_load($entities, $type) {
+  if ($type == 'field_collection_item') {
+    foreach ($entities as $e) {
+      lingotek_normalize_field_collection_language($e);
+    }
+  }
+}
+
 /**
  * Implements hook_entity_presave().
   */
 function lingotek_entity_presave($entity, $type) {
-  /*global $language;
   if ($type == 'field_collection_item') {
-    foreach ($entity as $key => $value) {
-      if (is_array($value) && array_key_exists('und', $value)) {
-        $entity->{$key}[$language->language] = $value['und'];
-        unset($entity->{$key}['und']);
-      }
-    }
-  }*/
+    lingotek_normalize_field_collection_language($entity, FALSE);
+  }
 }
 
 /**
@@ -1951,35 +2042,6 @@ function lingotek_cron() {
   LingotekLog::trace(__METHOD__ . ' ran');
 }
 
-function lingotek_views_post_execute(&$view) {
-  global $language;
-  
-  if ((user_access('manage projects') || user_access('translation')) && variable_get('lingotek_views_edit_links')) {
-    $included = FALSE;
-
- 
-    foreach ($view->result as &$row) {
-      if (isset($row->nid)) {
-        foreach ($row as $name => &$field) {
-          if (substr($name, 0, 5) == 'field' && !is_string($field) && isset($field[0])) {
-            $included = TRUE;
-            $text = '<img src="' . base_path() . drupal_get_path('module', 'lingotek') . '/images/ico_chevs_dd.png" >'; 
-            $url = 'node/' . $row->{$view->base_field} . '/lingotekworkbench/' . Lingotek::convertDrupal2Lingotek($language->language);
-            $tooltip = 'Edit this translation';
-            $edit = l($text, $url, array('attributes' => array('target' => '_blank', 'title' => $tooltip, 'class' => array('translation-link')), 'html' => TRUE));
-            $field[0]['rendered']['#markup'] = $edit . $field[0]['rendered']['#markup'];
-            break;
-          }
-        }
-      }
-    }
-
-    if ($included) {
-      drupal_add_css(drupal_get_path('module', 'lingotek') . '/style/workbench-link.css', array('group' => CSS_DEFAULT));
-    }
-  }
-}
-
 /*
  * Implements hook_l10n_update
  */
@@ -1987,4 +2049,170 @@ function lingotek_l10n_update_projects_alter(&$projects) {
   if (variable_get('lingotek_use_translation_from_drupal', 0) != 1) {
     $projects = array();
   }
+}
+
+/*
+ * Implements hook_node_view_alter
+ */
+function lingotek_node_view_alter(&$info) {
+  if (!variable_get('lingotek_show_language_label', 0)) {
+    if (isset($info['language'])) {
+      unset($info['language']);
+    }
+  }
+}
+
+
+function lingotek_get_change_workflow_form($form, &$form_state, $node = NULL) {  
+  $second_run = isset($form_state['triggering_element']);
+  
+  $bulk_grid = FALSE;
+  $multiple = FALSE;
+  
+  if (isset($form_state['nids'])) {
+    $nids = $form_state['nids'];
+    $bulk_grid = TRUE;
+    $multiple = count($nids) > 1;
+    if (!$multiple) {
+      $node = lingotek_node_load_default(reset($nids));
+    }
+    else {
+      if (!$second_run) {
+        drupal_set_message(t('You will be changing the workflow for @number nodes.', array('@number' => count($nids))), 'warning');
+      }
+      $node = new stdClass();
+      $node->lingotek = lingotek_get_global_profile();
+      $node->lingotek['profile'] = LingotekSync::PROFILE_DISABLED;// Note: Consider making this default 'Automatic' (after it is a fixed profile; can't be deleted)
+    }
+  }
+  
+  drupal_add_css(drupal_get_path('module', 'lingotek') . '/style/form.css');
+
+  $title = t('Change Workflow');
+
+  // Vertical Tab.
+  $form['lingotek'] = array(
+    '#title' => t('Change Workflow'),
+    '#type' => 'fieldset',
+    '#collapsible' => !$bulk_grid,
+    '#collapsed' => !$bulk_grid,
+    '#group' => 'additional_settings',
+    '#attributes' => array('id' => array('lingotek_fieldset')),
+    '#attached' => array(
+      'js' => array(drupal_get_path('module', 'lingotek') . '/js/lingotek.form.js'),
+    ),
+    '#modal' => TRUE,
+    '#tree' => TRUE,
+  );
+    
+  if (isset($node->tnid) && $node->tnid != 0 && $node->tnid != $node->nid) {
+    $form['lingotek']['note'] = array(
+      '#markup' => t('This is a target node for the language code: @lang. To change
+        the Lingotek settings please edit the source node.', array('@lang' => $node->language)),
+    );
+    
+    return $form; //this is a target node and thus should not have lingotek settings
+  }
+
+  if (isset($nids)) {
+    $form['lingotek']['nids'] = array(
+      '#type' => 'hidden',
+      '#default_value' => json_encode($nids),
+    );
+  }
+  
+  $form['lingotek']['lingotek_note'] = array(
+    '#type' => 'item',
+    '#title' => $title,
+    '#description' => t("This option allows you to replace the current workflow with a new workflow. This will result in the removal of any existing translations. You can optionally restore those translations to a phase in the new workflow."),
+  );
+  
+  $api = LingotekApi::instance();
+
+
+  if ($workflows = $api->listWorkflows()) {
+    if (!isset($form_state['values']['workflow_id'])) {
+      $keys = array_keys($workflows);
+      $form_state['values']['workflow_id'] = $keys[0];
+    }
+    
+    $form['lingotek']['workflow_id'] = array(
+      '#type' => 'select',
+      '#title' => t('Workflow'),
+      '#description' => t('Choose the Workflow'),
+      '#options' => $workflows,
+      '#empty_option' => '(select one)',
+      '#ajax' => array(
+        'callback' => 'lingotek_get_change_workflow_form_callback',
+        'wrapper' => 'prefill-phases-div',
+        'method' => 'replace',
+        'effect' => 'fade',
+        ),
+      '#prefix' => '<div id="prefill-phases-div">',
+    );
+    if (isset($node)) {
+     $form['lingotek']['workflow_id']['#default_value'] = $node->lingotek['workflow_id'];
+    }
+    
+    $form['lingotek']['prefill_phases_checkbox'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Restore to a phase in the new workflow'),
+      '#default_value' => TRUE,
+      '#description' => t('Prefill the new workflow with translations from the previous workflow'),
+    );
+    
+    $form['lingotek']['prefill_phase_select'] = array(
+      '#title' => t("Desired Prefill Phase"),
+      '#description' => t('Please select the highest phase which should be prefilled for the new workflow'),
+      '#type' => 'select',
+      '#states' => array(
+          'invisible' => array(':input[name="lingotek[prefill_phases_checkbox]"]' => array('checked' => FALSE)),
+        ),
+      '#suffix' => '</div>',
+    );
+    if (isset($form_state['values']['lingotek']['workflow_id']) && $form_state['values']['lingotek']['workflow_id'] != NULL) {
+      $form['lingotek']['prefill_phase_select']['#options'] = lingotek_get_phases_by_workflow_id($form_state['values']['lingotek']['workflow_id']);
+    }
+    else {
+      $form['lingotek']['prefill_phase_select']['#options'] = array('-1' => '(first choose a workflow)');
+      $form['lingotek']['prefill_phase_select']['#disabled'] = TRUE;
+    }
+  }
+
+  if ($bulk_grid) {
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Submit'),
+      '#submit' => array('lingotek_get_change_workflow_form_submit'),
+    );
+  }
+
+  return $form;
+}
+
+function lingotek_get_change_workflow_form_callback($form, $form_state) {
+  if (isset($form_state['values']['lingotek']['prefill_phases_checkbox']) 
+      && $form_state['values']['lingotek']['prefill_phases_checkbox']) {
+    return array(
+      $form['lingotek']['prefill_phase_select'], 
+      $form['lingotek']['prefill_phases_checkbox'],
+      $form['lingotek']['workflow_id'],
+    );
+  }
+  return $form['lingotek']['workflow_id'];
+}
+
+function lingotek_get_phases_by_workflow_id($workflow_id) {
+  $api = LingotekApi::instance();
+  $response = $api->request('getWorkflow', array('id' => $workflow_id));
+  $phases = array();
+  $excluded_phases = array('Project Setup', 'Workflow Completion');
+  if (isset($response->workflow->steps)) {
+    foreach ($response->workflow->steps as $id => $phase_obj) {
+      if (!in_array($phase_obj->name, $excluded_phases)) {
+        $phases[$id] = $phase_obj->name;
+      }
+    }
+  }
+  return $phases;
 }

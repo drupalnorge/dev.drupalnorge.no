@@ -2,8 +2,6 @@ name = Commons Groups
 description = Commons Organic Groups Functionality
 core = 7.x
 package = Commons - Building blocks
-version = 7.x-3.0
-project = commons_groups
 dependencies[] = commons_body
 dependencies[] = commons_bw
 dependencies[] = commons_topics
@@ -75,9 +73,9 @@ features[views_view][] = commons_groups_user_groups
 features_exclude[field][node-group-group_group] = node-group-group_group
 features_exclude[field][node-group-group_access] = node-group-group_access
 
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 

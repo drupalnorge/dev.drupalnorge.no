@@ -2,7 +2,6 @@ name = Commons Social Sharing
 description = Provide links to share content to external social services such as Facebook and Google+
 core = 7.x
 package = Commons - Building blocks
-project = commons_social_sharing
 dependencies[] = ctools
 dependencies[] = sharethis
 dependencies[] = strongarm
@@ -18,9 +17,9 @@ features[variable][] = sharethis_teaser_option
 features[variable][] = sharethis_weight
 features[variable][] = sharethis_widget_option
 
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 

@@ -10,9 +10,9 @@ dependencies[] = http_client_oauth
 dependencies[] = ctools
 
 
-; Information added by drush on 2013-10-17
+; Information added by drush on 2013-11-22
 version = "7.x-1.0-beta1+6-dev"
 core = "7.x"
 project = "oauthconnector"
-datestamp = "1382042531"
+datestamp = "1385164723"
 

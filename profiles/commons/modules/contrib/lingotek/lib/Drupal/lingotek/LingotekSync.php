@@ -15,7 +15,7 @@ class LingotekSync {
   const STATUS_PENDING = 'PENDING';  // The target translation is awaiting to receive updated content from Lingotek
   const STATUS_READY = 'READY';      // The target translation is complete and ready for download
   const STATUS_DISABLED = 'DISABLED';    // A disabled node should neither be uploaded nor downloaded by Lingotek
-  const STATUS_TARGET = 'TARGET';    // A target node is being used to store a translation and should be ignored by Lingotek
+  const STATUS_TARGET = 'TARGET';    // A target node is being used to store a translation and should be ignored by Lingotek (used for node storage)
 
   const PROFILE_CUSTOM = 'CUSTOM';
   const PROFILE_DISABLED = 'DISABLED';
@@ -110,9 +110,13 @@ class LingotekSync {
     $subquery = db_select('node', 'n')->fields('n', array('nid'));
     $subquery->condition('language', $drupal_language_code);
 
+    $subquery2 = db_select('lingotek', 'l2')->fields('l2', array('nid'));
+    $subquery2->condition('lingokey', 'target_sync_status_' . $lingotek_locale); //already has status
+
     $query = db_select('lingotek', 'l')->fields('l');
     $query->condition('lingokey', 'node_sync_status');
     $query->condition('nid', $subquery, 'NOT IN'); // exclude adding to nodes where this locale is the source
+    $query->condition('nid', $subquery2, 'NOT IN'); // exclude nodes that already have this language as a target
     $result = $query->execute();
 
     while ($record = $result->fetchAssoc()) {
@@ -902,13 +906,19 @@ class LingotekSync {
     return $found;
   }
 
-  public static function getDocIdsFromNodeIds($drupal_node_ids) {
-
+  public static function getDocIdsFromNodeIds($drupal_node_ids, $associate = FALSE) {
     $query = db_select('lingotek', 'l')
-        ->fields('l', array('lingovalue'))
         ->condition('nid', $drupal_node_ids, 'IN')
         ->condition('lingokey', 'document_id');
-    $result = $query->execute()->fetchCol();
+    $query->addField('l', 'lingovalue', 'doc_id');
+
+    if ($associate) {
+      $query->addField('l', 'nid');
+      $result = $query->execute()->fetchAllAssoc('nid');
+    }
+    else {
+      $result = $query->execute()->fetchCol();
+    }
 
     return $result;
   }

@@ -2,8 +2,6 @@ name = Commons Trusted Contacts
 description = Commons Trusted Contacts Functionality
 core = 7.x
 package = Commons - Building blocks
-version = 7.x-3.0
-project = commons_trusted_contacts
 dependencies[] = commons_groups
 dependencies[] = ctools
 dependencies[] = date
@@ -55,9 +53,9 @@ features_exclude[field][message-trusted_contact_request_approved-field_approving
 features_exclude[field][message-trusted_contact_request_pending-field_requesting_user] = message-trusted_contact_request_pending-field_requesting_user
 files[] = views/handlers/commons_groups_handler_send_message.inc
 
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 

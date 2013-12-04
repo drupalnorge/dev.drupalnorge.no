@@ -88,9 +88,9 @@ function lingotek_notifications() {
   $attempts = 0;
   while ($attempts < 3) {
     $nid = LingotekSync::getNodeIdFromDocId($document_id);
-    if(!$nid) { // check for the old style document_id
+    if (!$nid) { // check for the old style document_id
       $nid = LingotekSync::getNodeIdFromDocId($document_idx);
-      if($nid){
+      if ($nid) {
         $document_id = $document_idx;
       }
     }
@@ -343,18 +343,6 @@ function lingotek_form_bulk_sync($form, $form_state) {
         );
       }
     }
-    if (module_exists('entity_translation')) {
-      $form['upload']['upload_nids_et_json'] = array('#type' => 'hidden', '#value' => json_encode($report['upload_nids_et']));
-      if ($report['upload_nids_et_count'] > 0) {
-        $form['upload']['upload_et'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Include nodes managed by Entity Translation (<span id="upload-et-total">@count</span>)', array('@count' => $report['upload_nids_et_count'])),
-          '#default_value' => 0,
-          '#disabled' => $report['upload_nids_et_count'] == 0,
-          '#description' => t('These nodes will now be managed by Lingotek.')
-        );
-      }
-    }
     if (variable_get('lingotek_translate_config')) {
       // pre-build include/exclude messages based on enabled config types
       $config_types = array(
@@ -398,7 +386,7 @@ function lingotek_form_bulk_sync($form, $form_state) {
         $additional_desc .= t('(You can also enable translation for')
             . ' ' . $cf_excluded_str . ' '
             . t('within') . ' ' . t('Translation Configuration in') . ' '
-            . l('Lingotek Settings', 'admin/settings/lingotek/settings')
+            . l(t('Lingotek Settings'), 'admin/settings/lingotek/settings')
             . ')<br/>';
       }
       if (variable_get('lingotek_use_translation_from_drupal')) {
@@ -873,12 +861,6 @@ function lingotek_get_and_update_target_progress($document_ids) {
             $to_status = LingotekSync::STATUS_PENDING; // Set it to pending
           }
           $values[] = array($nid, 'target_sync_status_' . $language, $to_status);
-          if ($trans_obj) {
-            $trans_obj->deleteMetadataValue('target_sync_status_' . $language);
-          }
-          else {
-            lingotek_lingonode_variable_delete($nid, 'target_sync_status_' . $language);
-          }
         }
       }
       // for now just report on node translation progress...
@@ -898,19 +880,28 @@ function lingotek_get_and_update_target_progress($document_ids) {
     }
     if ($delete_cids_maybe) {
       foreach ($delete_cids_maybe as $cid) {
-        $trans_obj->deleteMetadataValue('target_sync_progress_%');
-        $trans_obj->deleteMetadataValue('target_sync_last_progress_updated_%');
-        $trans_obj->deleteMetadataValue('translation_progress');
+        if ($trans_obj = LingotekConfigChunk::loadById($cid)) {
+          $trans_obj->deleteMetadataValue('target_sync_progress_%');
+          $trans_obj->deleteMetadataValue('target_sync_last_progress_updated_%');
+          $trans_obj->deleteMetadataValue('translation_progress');
+        }
       }
     }
-    
-    // insert status info for nodes
-    $query = db_insert('lingotek')
-      ->fields(array('nid', 'lingokey', 'lingovalue'));
+
+    // merge status info for nodes
     foreach ($node_values as $record) {
-      $query->values($record);
+      $nid = (isset($record['nid']) ? $record['nid'] : $record[0]);
+      $lingokey = (isset($record['lingokey']) ? $record['lingokey'] : $record[1]);
+      $lingovalue = (isset($record['lingovalue']) ? $record['lingovalue'] : $record[2]);
+      $query = db_merge('lingotek')
+        ->key(array('nid' => $nid, 'lingokey' => $lingokey))
+        ->fields(array(
+            'nid' => $nid,
+            'lingokey' => $lingokey,
+            'lingovalue' => $lingovalue,
+          ))
+        ->execute();
     }
-    $query->execute();
     
     // insert status info for config
     foreach ($cfg_values as $record) {
@@ -927,14 +918,14 @@ function lingotek_get_and_update_target_progress($document_ids) {
     return $progress_report;
   }
   else {
-    $error_message = "API Error(s): <ul>";
+    $error_message = t("API Error(s):") . " <ul>";
     if (is_array($progress_report->errors)) {
       foreach ($progress_report->errors as $error) {
-        $error_message .= "<li>".$error."</li>";
+        $error_message .= "<li>" . $error . "</li>";
       }
     }
     $error_message .= "</ul><i>For additional information, check your recent log messages</i>";
-    drupal_set_message($error_message, 'error');
+    drupal_set_message(t('@error_message', array('@error_message' => $error_message)), 'error');
   }
 
 }

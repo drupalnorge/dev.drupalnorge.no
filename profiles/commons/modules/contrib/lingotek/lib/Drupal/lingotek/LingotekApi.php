@@ -741,7 +741,8 @@ class LingotekApi {
         'externalId' => $externalId
       );
 
-      if ($output = $this->request('getWorkbenchLink', $params)) {
+      $output = $this->request('getWorkbenchLink', $params);
+      if ($output && isset($output->url)) {
         $links[$static_id] = $url = $output->url;
       }
       else {
@@ -785,14 +786,15 @@ class LingotekApi {
    * Gets available Lingotek Workflows.
    * 
    * @param $reset
-   *   A boolean value to determin whether we need to query the API
+   *   A boolean value to determine whether we need to query the API
+   * @param $include_public
+   *   A boolean value to determine whether to show public workflows
    * 
    * @return array
    *   An array of available Workflows with workflow IDs as keys, workflow labels as values.
    */
-  public function listWorkflows($reset = FALSE) {
+  public function listWorkflows($reset = FALSE, $include_public = FALSE) {
     $workflows = variable_get('lingotek_workflow_defaults', array());
-
     if (!empty($workflows) && $reset == FALSE) {
       return $workflows;
     }
@@ -800,6 +802,8 @@ class LingotekApi {
     if ($workflows_raw = $this->request('listWorkflows')) {
       $workflows = array();
       foreach ($workflows_raw->workflows as $workflow) {
+        if ($include_public || (!$workflow->is_public 
+            && $workflow->owner != LINGOTEK_DEFAULT_WORKFLOW_TEMPLATE))
         $workflows[$workflow->id] = $workflow->name;
       }
       variable_set('lingotek_workflow_defaults', $workflows);
@@ -847,6 +851,32 @@ class LingotekApi {
     }
 
     return $vaults;
+  }
+
+  /**
+   * Updates one or more nids to belong to a given workflow
+   * 
+   * @param array $document_ids
+   *   An array of document IDs
+   * @param string $workflow_id
+   *   A string containing the desired workflow_id
+   * @param string $prefillPhase
+   *   An optional parameter specifying the prefill phase
+   * 
+   * @return bool
+   *   TRUE on success, FALSE on failure.
+   */
+  public function changeWorkflow($document_ids, $workflow_id, $prefillPhase=NULL) {
+    $parameters = array(
+      'documentId' => $document_ids,
+      'workflowId' => $workflow_id,
+      'preserveTargets' => 'true',
+    );
+    if ($prefillPhase) {
+      $parameters['prefillPhase'] = $prefillPhase;
+    }
+
+    return ($this->request('resetDocument', $parameters) ? TRUE : FALSE);
   }
 
   /**
@@ -1068,6 +1098,7 @@ class LingotekApi {
   public function createCommunity($parameters = array(), $callback_url = NULL) {
     $credentials = array('consumer_key' => LINGOTEK_AP_OAUTH_KEY, 'consumer_secret' => LINGOTEK_AP_OAUTH_SECRET);
     if (isset($callback_url)) {
+      $parameters['projectName'] = lingotek_get_site_name(); 
       $parameters['callbackUrl'] = $callback_url;
     }
     $response = $this->request('autoProvisionCommunity', $parameters, 'POST', $credentials);

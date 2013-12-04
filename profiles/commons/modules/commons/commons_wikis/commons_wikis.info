@@ -2,7 +2,6 @@ name = Commons Wikis
 description = Provides the wiki functionality for Drupal Commons
 core = 7.x
 package = Commons - Content types
-project = commons_wikis
 dependencies[] = commons_body
 dependencies[] = commons_groups
 dependencies[] = commons_topics
@@ -22,7 +21,6 @@ dependencies[] = text
 dependencies[] = views
 dependencies[] = views_content
 dependencies[] = views_litepager
-datestamp = 1359684042
 features[ctools][] = page_manager:pages_default:1
 features[ctools][] = strongarm:strongarm:1
 features[ctools][] = views:views_default:3.0
@@ -64,9 +62,9 @@ features[views_view][] = commons_bw_wikis
 features[views_view][] = commons_wikis_contributor_list
 features_exclude[dependencies][commons_trusted_contacts] = commons_trusted_contacts
 
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 

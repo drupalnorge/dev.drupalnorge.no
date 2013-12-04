@@ -41,16 +41,15 @@ files[] = lib/Drupal/lingotek/LingotekTranslatableEntity.php
 
 files[] = tests/lingotek.base.test
 files[] = tests/lingotek.access.test
-files[] = tests/lingotek.advanced_parsing.test
 files[] = tests/lingotek.setup.test
 
 files[] = lingotek_views_handler_workbench_link.inc
 
 stylesheets[all][] = style/base.css
 
-; Information added by drupal.org packaging script on 2013-10-15
-version = "7.x-4.06"
+; Information added by  packaging script on 2013-11-18
+version = "7.x-4.09"
 core = "7.x"
 project = "lingotek"
-datestamp = "1381859891"
+datestamp = "1384818213"
 

@@ -2,7 +2,6 @@ name = Commons Wikis Home
 description = Provides the panelizer feature for Wikis.
 core = 7.x
 package = Commons - Landing pages
-project = commons_wikis_pages
 dependencies[] = commons_wikis
 dependencies[] = ctools
 dependencies[] = panelizer
@@ -13,9 +12,9 @@ features[features_api][] = api:2
 features[panelizer_defaults][] = node:wiki:default
 features[variable][] = panelizer_defaults_node_wiki
 
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 

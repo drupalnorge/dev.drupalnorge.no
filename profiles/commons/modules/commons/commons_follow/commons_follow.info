@@ -2,14 +2,12 @@ name = Commons Follow
 description = Views and Field integration for Commons Following functionality.
 core = 7.x
 package = Commons - Building blocks
-project = commons_follow
 dependencies[] = ctools
 dependencies[] = entityreference
 dependencies[] = features
 dependencies[] = field_sql_storage
 dependencies[] = message_subscribe
 dependencies[] = strongarm
-datestamp = 1354747305
 features[ctools][] = strongarm:strongarm:1
 features[features_api][] = api:2
 features[field_base][] = field_target_comments
@@ -25,9 +23,9 @@ files[] = includes/views/handlers/commons_follow_plugin_argument_default_message
 files[] = includes/views/handlers/commons_follow_user_follow_filter.inc
 files[] = includes/views/handlers/commons_follow_user_follow_filter_message.inc
 
-; Information added by drupal.org packaging script on 2013-10-17
-version = "7.x-3.4"
+; Information added by  packaging script on 2013-11-22
+version = "7.x-3.5"
 core = "7.x"
 project = "commons"
-datestamp = "1382042464"
+datestamp = "1385164710"
 
