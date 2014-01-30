@@ -153,7 +153,7 @@ class panels_renderer_editor extends panels_renderer_standard {
 
     $output = '<div class="' . $class . '" id="panel-pane-' . $pane->pid . '">';
 
-    if (!$block->title) {
+    if (empty($block->title)) {
       $block->title = t('No title');
     }
 
@@ -581,7 +581,7 @@ class panels_renderer_editor extends panels_renderer_standard {
    * @todo -- this should be in CTools.
    */
   function get_category($content_type) {
-    if (isset($content_type['top level'])) {
+    if (!empty($content_type['top level'])) {
       $category = 'root';
     }
     else if (isset($content_type['category'])) {
@@ -756,6 +756,11 @@ class panels_renderer_editor extends panels_renderer_standard {
     else if (!empty($form_state['complete'])) {
       // References get blown away with AJAX caching. This will fix that.
       $this->cache->display->content[$pid] = $form_state['pane'];
+
+      // Conditionally overwrite the context for this panel if present in the form state.
+      if (!empty($form_state['display_cache']->display->context)) {
+        $this->cache->display->context = $form_state['display_cache']->display->context;
+      }
 
       panels_edit_cache_set($this->cache);
       $this->command_update_pane($pid);
@@ -1158,7 +1163,11 @@ class panels_renderer_editor extends panels_renderer_standard {
       unset($this->cache->style);
     }
 
-    // $conf was a reference so it should just modify.
+    // Copy settings from form state back into the cache.
+    if(!empty($form_state['values']['settings'])) {
+      $this->cache->display->content[$pid]->style['settings'] = $form_state['values']['settings'];
+    }
+
     panels_edit_cache_set($this->cache);
 
     $this->commands[] = ctools_modal_command_dismiss();

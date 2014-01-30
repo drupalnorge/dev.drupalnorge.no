@@ -9,7 +9,7 @@ projects[acquia_connector][version] = "2.12"
 
 projects[addressfield][type] = "module"
 projects[addressfield][subdir] = "contrib"
-projects[addressfield][version] = "1.0-beta4"
+projects[addressfield][version] = "1.0-beta5"
 
 projects[addressfield_tokens][type] = "module"
 projects[addressfield_tokens][subdir] = "contrib"
@@ -25,6 +25,9 @@ projects[admin_icons][download][revision] = "60d9f28801533fecc92216a60d444d89d80
 projects[advancedqueue][type] = "module"
 projects[advancedqueue][subdir] = "contrib"
 projects[advancedqueue][version] = "1.0-alpha2"
+; Cleanup of the advancedqueue table:
+; https://drupal.org/comment/7817905#comment-7817905
+projects[advancedqueue][patch][] = "https://drupal.org/files/purging_table-2054555.patch"
 
 projects[apachesolr][type] = "module"
 projects[apachesolr][subdir] = "contrib"
@@ -54,7 +57,10 @@ projects[apachesolr_user][patch][] = "http://drupal.org/files/2077281-apache-sol
 
 projects[breakpoints][type] = "module"
 projects[breakpoints][subdir] = "contrib"
-projects[breakpoints][version] = "1.1"
+projects[breakpoints][download][type] = "git"
+projects[breakpoints][download][url] = "http://git.drupal.org/project/breakpoints.git"
+projects[breakpoints][download][branch] = "7.x-1.x"
+projects[breakpoints][download][revision] = "c4f3665"
 
 projects[connector][type] = "module"
 projects[connector][subdir] = "contrib"
@@ -62,7 +68,22 @@ projects[connector][version] = "1.0-beta2"
 
 projects[ckeditor][type] = "module"
 projects[ckeditor][subdir] = "contrib"
-projects[ckeditor][version] = "1.13"
+projects[ckeditor][download][type] = "git"
+projects[ckeditor][download][url] = "http://git.drupal.org/project/ckeditor.git"
+projects[ckeditor][download][branch] = "7.x-1.x"
+projects[ckeditor][download][revision] = "b69a9ac"
+
+; Only load CSS when necessary.
+; https://drupal.org/node/1370894
+projects[ckeditor][patch][] = "https://drupal.org/files/issues/attach-ckeditor-css-1370894-4.patch"
+
+; Accomodate latest Media changes.
+; https://drupal.org/node/2159403
+projects[ckeditor][patch][] = "https://drupal.org/files/issues/ckeditor-accomodate-latest-media-changes-0.patch"
+
+; Remove redundant external plugin declarations.
+; https://drupal.org/comment/8284591#comment-8284591
+projects[ckeditor][patch][] = "https://drupal.org/files/issues/ckeditor-remove-external-plugin-declarations-1-alt.patch"
 
 projects[ctools][type] = "module"
 projects[ctools][subdir] = "contrib"
@@ -88,7 +109,7 @@ projects[custom_search][patch][] = "http://drupal.org/files/commons_search_js_en
 
 projects[date][type] = "module"
 projects[date][subdir] = "contrib"
-projects[date][version] = "2.6"
+projects[date][version] = "2.7"
 
 projects[date_facets][type] = "module"
 projects[date_facets][subdir] = "contrib"
@@ -108,13 +129,17 @@ projects[edit_profile][type] = "module"
 projects[edit_profile][subdir] = "contrib"
 projects[edit_profile][version] = "1.0-beta2"
 
+projects[elements][type] = "module"
+projects[elements][subdir] = "contrib"
+projects[elements][version] = "1.4"
+
 projects[email_registration][type] = "module"
 projects[email_registration][subdir] = "contrib"
 projects[email_registration][version] = "1.1"
 
 projects[entity][type] = "module"
 projects[entity][subdir] = "contrib"
-projects[entity][version] = "1.2"
+projects[entity][version] = "1.3"
 
 projects[entitycache][type] = "module"
 projects[entitycache][subdir] = "contrib"
@@ -130,7 +155,7 @@ projects[entityreference][version] = "1.1"
 
 projects[entityreference_prepopulate][type] = "module"
 projects[entityreference_prepopulate][subdir] = "contrib"
-projects[entityreference_prepopulate][version] = "1.3"
+projects[entityreference_prepopulate][version] = "1.4"
 
 projects[entity_translation][type] = "module"
 projects[entity_translation][subdir] = "contrib"
@@ -143,6 +168,10 @@ projects[facetapi][version] = "1.3"
 projects[features][type] = "module"
 projects[features][subdir] = "contrib"
 projects[features][version] = "2.0"
+
+projects[file_entity][type] = "module"
+projects[file_entity][subdir] = "contrib"
+projects[file_entity][version] = "2.0-alpha3"
 
 projects[flag][type] = "module"
 projects[flag][subdir] = "contrib"
@@ -189,11 +218,18 @@ projects[libraries][version] = "2.1"
 
 projects[lingotek][type] = "module"
 projects[lingotek][subdir] = "contrib"
-projects[lingotek][version] = "4.09"
+projects[lingotek][version] = "4.10"
 
 projects[link][type] = "module"
 projects[link][subdir] = "contrib"
-projects[link][version] = "1.1"
+projects[link][version] = "1.2"
+
+projects[media][type] = "module"
+projects[media][subdir] = "contrib"
+projects[media][download][type] = "git"
+projects[media][download][url] = "http://git.drupal.org/project/media.git"
+projects[media][download][branch] = "7.x-2.x"
+projects[media][download][revision] = "1f46a9a"
 
 projects[memcache][type] = "module"
 projects[memcache][subdir] = "contrib"
@@ -227,10 +263,6 @@ projects[metatag][type] = "module"
 projects[metatag][subdir] = "contrib"
 projects[metatag][version] = "1.0-beta7"
 
-; Support for rel=author link in head.
-; http://drupal.org/node/1865228#comment-6839604
-projects[metatag][patch][] = "http://drupal.org/files/metatag-n1865228-3.patch"
-
 projects[module_filter][type] = "module"
 projects[module_filter][subdir] = "contrib"
 projects[module_filter][version] = "1.8"
@@ -241,10 +273,7 @@ projects[mollom][version] = "2.8"
 
 projects[navbar][type] = "module"
 projects[navbar][subdir] = "contrib"
-projects[navbar][download][type] = "git"
-projects[navbar][download][url] = "http://git.drupal.org/project/navbar.git"
-projects[navbar][download][branch] = "7.x-1.x"
-projects[navbar][download][revision] = "dd542e1a74d9c9b3a9b5bd699aad9a4b65e5c5b7"
+projects[navbar][version] = "1.3"
 
 projects[oauth][type] = "module"
 projects[oauth][subdir] = "contrib"
@@ -255,7 +284,38 @@ projects[oauthconnector][subdir] = "contrib"
 projects[oauthconnector][download][type] = "git"
 projects[oauthconnector][download][url] = "http://git.drupal.org/project/oauthconnector.git"
 projects[oauthconnector][download][branch] = "7.x-1.x"
-projects[oauthconnector][download][revision] = "0ce7ac9614710c0f68d0a58cb4ae4667f8bd6fa7"
+projects[oauthconnector][download][revision] = "42c6f66"
+
+projects[oembed][type] = "module"
+projects[oembed][subdir] = "contrib"
+projects[oembed][download][type] = "git"
+projects[oembed][download][url] = "http://git.drupal.org/project/oembed.git"
+projects[oembed][download][branch] = "7.x-1.x"
+projects[oembed][download][revision] = "63898e1"
+
+; Fix PHP fatal error when enabling the module
+; https://drupal.org/comment/7987343#comment-7987343
+projects[oembed][patch][] = "https://drupal.org/files/oembed-2021015-1.patch"
+
+; Add oEmbed plugins to list of supported media providers
+; https://drupal.org/comment/8287243#comment-8287243
+projects[oembed][patch][] = "https://drupal.org/files/issues/list-enabled-plugins-2159335-1.patch"
+
+; Remove WYSIWYG special casing
+; https://drupal.org/comment/8287861#comment-8287861
+projects[oembed][patch][] = "https://drupal.org/files/issues/remove-wysiwyg-special-casing-2159303-2.patch"
+
+; Provided a default display configuration
+; https://drupal.org/comment/8286995#comment-8286995
+projects[oembed][patch][] = "https://drupal.org/files/issues/provide-default-display-configuration-2128389-3.patch"
+
+; Add supported file and MIME type information to file formatters
+; https://drupal.org/comment/8286935#comment-8286935
+projects[oembed][patch][] = "https://drupal.org/files/issues/add-file-and-mime-type-information-to-formatters-2159275-1.patch"
+
+; Themed images ignore width, height, alt and title attributes
+; https://drupal.org/comment/8286915#comment-8286915
+projects[oembed][patch][] = "https://drupal.org/files/issues/prefer-element-attributes-2159269-1.patch"
 
 projects[og][type] = "module"
 projects[og][subdir] = "contrib"
@@ -263,7 +323,7 @@ projects[og][version] = "2.4"
 
 ; Auto-assign role to group manager broken on groups with overridden roles.
 ; https://drupal.org/node/2005800#comment-7684873
-projects[og][patch][] = "http://drupal.org/files/issues/og-default-role-member-2005800-23.patch"
+projects[og][patch][] = "http://drupal.org/files/issues/og-default-role-member-2005800-25.patch"
 
 ; og_ui should give users the theme, not admin ui when creating groups.
 ; http://drupal.org/node/1800208
@@ -275,19 +335,10 @@ projects[panelizer][version] = "3.1"
 
 projects[panels][type] = "module"
 projects[panels][subdir] = "contrib"
-projects[panels][version] = "3.3"
-
-; Fatal error: Call to undefined function panels_get_layouts().
-; http://drupal.org/node/1828684#comment-6694732
-projects[panels][patch][] = "http://drupal.org/files/1828684-layout-fix-6.patch"
-
-; PHP 5.3.9 Strict Warning on Panels Empty Value.
-; http://drupal.org/node/1632898#comment-6412840
-projects[panels][patch][] = "http://drupal.org/files/panels-n1632898-15.patch"
-
-; Add internationalization support.
-; http://drupal.org/node/1179034#comment-7216342
-projects[panels][patch][] = "http://drupal.org/files/panels-1179034-41_____panels-uuids-127790-100__-80.patch"
+projects[panels][download][type] = "git"
+projects[panels][download][url] = "http://git.drupal.org/project/panels.git"
+projects[panels][download][branch] = "7.x-3.x-i18n"
+projects[panels][download][revision] = "43a3810e8b0d2ef435ef2bb190039391c8e1712f"
 
 projects[paranoia][type] = "module"
 projects[paranoia][subdir] = "contrib"
@@ -297,9 +348,32 @@ projects[pathauto][type] = "module"
 projects[pathauto][subdir] = "contrib"
 projects[pathauto][version] = "1.2"
 
-projects[placeholder][type] = "module"
-projects[placeholder][subdir] = "contrib"
-projects[placeholder][version] = "1.0"
+projects[picture][type] = "module"
+projects[picture][subdir] = "contrib"
+projects[picture][download][type] = "git"
+projects[picture][download][url] = "http://git.drupal.org/project/picture.git"
+projects[picture][download][branch] = "7.x-1.x"
+projects[picture][download][revision] = "18b94b9"
+
+; Add ctools as a dependency
+; https://drupal.org/node/2173043
+projects[picture][patch][] = "https://drupal.org/files/issues/add-ctools-dependency-2173043-1.patch"
+
+; Allow filter tips to be translated
+; https://drupal.org/node/2139459
+projects[picture][patch][] = "https://drupal.org/files/issues/translate-filter-tips-2139459-1.patch"
+
+; Move hook_uninstall() to picture.install to fix issues on uninstall.
+; https://drupal.org/node/2173015
+projects[picture][patch][] = "https://drupal.org/files/issues/move-uninstall-hook-implementation-2173015-1.patch"
+
+; Remove implementation of hook_file_formatter_info() to remove duplicate file formatter.
+; https://drupal.org/node/2172841
+projects[picture][patch][] = "https://drupal.org/files/issues/remove-file-formatter-hook-implementation-2172831-1.patch"
+
+; Remove implementation of hook_ctools_plugin_api() to fix issues with features.
+; https://drupal.org/node/2172831
+projects[picture][patch][] = "https://drupal.org/files/issues/remove-ctools-hook-implementation-2172831-1.patch"
 
 projects[pm_existing_pages][type] = "module"
 projects[pm_existing_pages][subdir] = "contrib"
@@ -365,10 +439,6 @@ projects[rich_snippets][type] = "module"
 projects[rich_snippets][subdir] = "contrib"
 projects[rich_snippets][version] = "1.0-beta3"
 
-; Remove snippets from non-node type searches.
-; http://drupal.org/node/1923904#comment-7094488
-projects[rich_snippets][patch][] = "http://drupal.org/files/1923904-search-nodes-only.patch"
-
 projects[rules][type] = "module"
 projects[rules][subdir] = "contrib"
 projects[rules][version] = "2.6"
@@ -384,6 +454,10 @@ projects[search_facetapi][version] = "1.0-beta2"
 projects[sharethis][type] = "module"
 projects[sharethis][subdir] = "contrib"
 projects[sharethis][version] = "2.5"
+
+projects[smartcrop][type] = "module"
+projects[smartcrop][subdir] = "contrib"
+projects[smartcrop][version] = "1.0-beta2"
 
 projects[strongarm][type] = "module"
 projects[strongarm][subdir] = "contrib"
@@ -422,7 +496,7 @@ projects[views][version] = "3.7"
 
 projects[views_bulk_operations][type] = "module"
 projects[views_bulk_operations][subdir] = "contrib"
-projects[views_bulk_operations][version] = "3.1"
+projects[views_bulk_operations][version] = "3.2"
 
 projects[views_field_view][type] = "module"
 projects[views_field_view][subdir] = "contrib"
@@ -434,7 +508,7 @@ projects[views_litepager][version] = "3.0"
 
 projects[views_load_more][type] = "module"
 projects[views_load_more][subdir] = "contrib"
-projects[views_load_more][version] = "1.1"
+projects[views_load_more][version] = "1.2"
 
 projects[votingapi][type] = "module"
 projects[votingapi][subdir] = "contrib"
@@ -457,6 +531,17 @@ projects[adaptivetheme][download][revision] = "b4b38c3c01d066e733c2942020c51962c
 ; http://drupal.org/node/1427226#comment-6638836
 projects[adaptivetheme][patch][] = "http://drupal.org/files/remove-comment-creation-link-2018081-1.patch"
 
+; Add styling for link buttons.
+; https://drupal.org/comment/8289329#comment-8289329
+projects[adaptivetheme][patch][] = "https://drupal.org/files/issues/add-link-button-styling-2159783-1.patch"
+
+projects[ember][type] = "theme"
+projects[ember][subdir] = "contrib"
+projects[ember][download][type] = "git"
+projects[ember][download][url] = "http://git.drupal.org/project/ember.git"
+projects[ember][download][branch] = "7.x-2.x"
+projects[ember][download][revision] = "1d88894"
+
 projects[sky][type] = "theme"
 projects[sky][subdir] = "contrib"
 projects[sky][version] = "3.0-rc1"
@@ -469,21 +554,29 @@ libraries[backbone][type] = "libraries"
 libraries[backbone][download][url] = "https://github.com/jashkenas/backbone/archive/1.1.0.tar.gz"
 
 libraries[ckeditor][download][type] = "get"
-libraries[ckeditor][download][url] = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.0/ckeditor_4.0_full.tar.gz"
+libraries[ckeditor][download][url] = "http://download.cksource.com/CKEditor/CKEditor/CKEditor%204.3.1/ckeditor_4.3.1_full.zip"
 libraries[ckeditor][type] = "libraries"
+
+libraries[ckeditor_lineutils][download][type] = "get"
+libraries[ckeditor_lineutils][download][url] = "http://download.ckeditor.com/lineutils/releases/lineutils_4.3.1.zip"
+libraries[ckeditor_lineutils][type] = "libraries"
+libraries[ckeditor_lineutils][subdir] = "ckeditor/plugins"
+libraries[ckeditor_lineutils][directory_name] = "lineutils"
+
+libraries[ckeditor_widget][download][type] = "get"
+libraries[ckeditor_widget][download][url] = "http://download.ckeditor.com/widget/releases/widget_4.3.1.zip"
+libraries[ckeditor_widget][type] = "libraries"
+libraries[ckeditor_widget][subdir] = "ckeditor/plugins"
+libraries[ckeditor_widget][directory_name] = "widget"
 
 libraries[modernizr][download][type] = "get"
 libraries[modernizr][type] = "libraries"
-libraries[modernizr][download][url] = "https://github.com/Modernizr/Modernizr/archive/v2.7.0.tar.gz"
-
-libraries[placeholder][download][type] = "get"
-libraries[placeholder][type] = "libraries"
-libraries[placeholder][download][url] = "https://github.com/mathiasbynens/jquery-placeholder/archive/v2.0.7.tar.gz"
+libraries[modernizr][download][url] = "https://github.com/Modernizr/Modernizr/archive/v2.7.1.tar.gz"
 
 libraries[timeago][download][type] = "get"
 libraries[timeago][type] = "libraries"
-libraries[timeago][download][url] = "https://raw.github.com/rmm5t/jquery-timeago/v1.3.0/jquery.timeago.js"
+libraries[timeago][download][url] = "https://raw.github.com/rmm5t/jquery-timeago/v1.3.1/jquery.timeago.js"
 
 libraries[underscore][download][type] = "get"
 libraries[underscore][type] = "libraries"
-libraries[underscore][download][url] = "https://github.com/jashkenas/underscore/archive/1.4.4.zip"
+libraries[underscore][download][url] = "https://github.com/jashkenas/underscore/archive/1.5.2.zip"

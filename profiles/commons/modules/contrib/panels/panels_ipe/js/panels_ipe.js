@@ -15,9 +15,11 @@ Drupal.PanelsIPE = {
     $('a.pane-delete:not(.pane-delete-processed)', context)
       .addClass('pane-delete-processed')
       .click(function() {
-        if (confirm('Remove this pane?')) {
+        if (confirm(Drupal.t('Remove this pane?'))) {
           $(this).parents('div.panels-ipe-portlet-wrapper').fadeOut('medium', function() {
+            var $sortable = $(this).closest('.ui-sortable');
             $(this).empty().remove();
+            $sortable.trigger('sortremove');
           });
           $(this).parents('div.panels-ipe-display-container').addClass('changed');
         }
@@ -34,6 +36,10 @@ Drupal.behaviors.PanelsIPE = {
       $('div#panels-ipe-display-' + key + ':not(.panels-ipe-processed)')
         .addClass('panels-ipe-processed')
         .each(function() {
+          // If we're replacing an old IPE, clean it up a little.
+          if (Drupal.PanelsIPE.editors[key]) {
+            Drupal.PanelsIPE.editors[key].editing = false;
+          }
           Drupal.PanelsIPE.editors[key] = new DrupalPanelsIPE(key);
           Drupal.PanelsIPE.editors[key].showContainer();
         });
@@ -89,6 +95,22 @@ function DrupalPanelsIPE(cache_key, cfg) {
     // re-display it.
     if (ipe.topParent && ipe.topParent.hasClass('panels-ipe-editing') && ipe.container.is(':not(visible)')) {
       ipe.showContainer();
+    }
+  });
+
+
+  // If a user navigates away from a locked IPE, cancel the lock in the background.
+  $(window).bind('beforeunload', function() {
+    if (!ipe.editing) {
+      return;
+    }
+
+    if (ipe.topParent && ipe.topParent.hasClass('changed')) {
+      ipe.changed = true;
+    }
+
+    if (ipe.changed) {
+      return Drupal.t('This will discard all unsaved changes. Are you sure?');
     }
   });
 
@@ -170,6 +192,7 @@ function DrupalPanelsIPE(cache_key, cfg) {
   };
 
   this.initEditing = function(formdata) {
+    ipe.editing = true;
     ipe.topParent = $('div#panels-ipe-display-' + cache_key);
     ipe.backup = this.topParent.clone();
 
@@ -212,17 +235,6 @@ function DrupalPanelsIPE(cache_key, cfg) {
     ipe.showForm();
     ipe.topParent.addClass('panels-ipe-editing');
 
-    //Reposition the "Add new pane" button
-    $('.panels-ipe-newblock').each(function() {
-      var link_width_half = parseInt($(this).children('a').outerWidth() / 2);
-
-      $(this).css('margin-left', '-' + link_width_half + 'px');
-
-      $(this).css('margin-top', '-' + parseInt($(this).children('a').outerHeight() / 2) + 'px');
-
-      $(this).parents('.panels-ipe-placeholder').find('h3').css('width', parseInt(($(this).parents('.panels-ipe-placeholder').width() / 2) - link_width_half) + 'px');
-    });
-
   };
 
   this.hideContainer = function() {
@@ -246,18 +258,18 @@ function DrupalPanelsIPE(cache_key, cfg) {
   };
 
   this.endEditing = function() {
+    ipe.editing = false;
     ipe.lockPath = null;
-    $('.panels-ipe-form-container', ipe.control).empty();
+    $('.panels-ipe-form-container').empty();
     // Re-show all the IPE non-editing meta-elements
     $('div.panels-ipe-off').show('fast');
 
     ipe.showButtons();
     // Re-hide all the IPE meta-elements
     $('div.panels-ipe-on').hide();
-    if (ipe.topParent) {
-      ipe.topParent.removeClass('panels-ipe-editing');
-      $('div.panels-ipe-sort-container', ipe.topParent).sortable("destroy");
-    }
+
+    $('.panels-ipe-editing').removeClass('panels-ipe-editing');
+    $('div.panels-ipe-sort-container', ipe.topParent).sortable("destroy");
   };
 
   this.saveEditing = function() {
@@ -334,11 +346,19 @@ $(function() {
       Drupal.PanelsIPE.editors[data.key].initEditing(data.data);
       Drupal.PanelsIPE.editors[data.key].lockPath = data.lockPath;
     }
+    Drupal.attachBehaviors();
+
   };
 
   Drupal.ajax.prototype.commands.IPEsetLockState = function(ajax, data, status) {
     if (Drupal.PanelsIPE.editors[data.key]) {
       Drupal.PanelsIPE.editors[data.key].lockPath = data.lockPath;
+    }
+  };
+
+  Drupal.ajax.prototype.commands.addNewPane = function(ajax, data, status) {
+    if (Drupal.PanelsIPE.editors[data.key]) {
+      Drupal.PanelsIPE.editors[data.key].changed = true;
     }
   };
 
@@ -372,6 +392,11 @@ $(function() {
    */
   Drupal.ajax.prototype.ipeReplacedEventResponse = Drupal.ajax.prototype.eventResponse;
   Drupal.ajax.prototype.eventResponse = function (element, event) {
+    if (element.ipeCancelThis) {
+      element.ipeCancelThis = null;
+      return false;
+    }
+
     if ($(this.element).attr('id') == 'panels-ipe-cancel') {
       if (!Drupal.PanelsIPE.editors[this.element_settings.ipe_cache_key].cancelEditing()) {
         return false;
@@ -404,7 +429,7 @@ $(function() {
 
   Drupal.ajax.prototype.ipeReplacedBeforeSerialize = Drupal.ajax.prototype.beforeSerialize;
   Drupal.ajax.prototype.beforeSerialize = function (element_settings, options) {
-    if ($(this.element).attr('id') == 'panels-ipe-save') {
+    if ($(this.element).hasClass('panels-ipe-save')) {
       Drupal.PanelsIPE.editors[this.element_settings.ipe_cache_key].saveEditing();
     };
     return this.ipeReplacedBeforeSerialize(element_settings, options);

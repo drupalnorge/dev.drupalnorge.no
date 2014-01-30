@@ -56,6 +56,15 @@
   ; unset_css[sites/all/modules/foobar_module/foobar_module.css] = 1
 
 
+;-----------// Breakpoints
+
+  breakpoints[Commons small portrait] = only screen and (max-width:320px)
+  breakpoints[Commons small landscape] = only screen and (min-width:321px) and (max-width:480px)
+  breakpoints[Commons medium portrait] = only screen and (min-width:481px) and (max-width:768px)
+  breakpoints[Commons medium landscape] = only screen and (min-width:769px) and (max-width:934px
+  breakpoints[Commons large] = only screen and (min-width:935px)
+
+
 ;----------// Scripts
 
   scripts[] = scripts/modernizr.js
@@ -420,9 +429,9 @@
 
   ;
 
-; Information added by  packaging script on 2013-11-22
-version = "7.x-3.5"
+; Information added by Drupal.org packaging script on 2014-01-16
+version = "7.x-3.8"
 core = "7.x"
 project = "commons"
-datestamp = "1385164710"
+datestamp = "1389902308"
 

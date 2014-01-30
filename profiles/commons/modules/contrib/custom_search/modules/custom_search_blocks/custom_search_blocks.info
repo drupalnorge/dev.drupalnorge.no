@@ -8,9 +8,9 @@ dependencies[] = custom_search
 
 configure = admin/config/search/custom_search/blocks
 
-; Information added by drush on 2013-11-22
+; Information added by drush on 2014-01-16
 version = "7.x-1.12+1-dev"
 core = "7.x"
 project = "custom_search"
-datestamp = "1385164742"
+datestamp = "1389902339"
 

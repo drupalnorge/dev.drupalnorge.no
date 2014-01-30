@@ -875,6 +875,7 @@ html.js fieldset.collapsed .fieldset-legend, html.js fieldset.collapsible .field
  * Button styles
  */
 /* Common styles for all buttons. */
+a.button,
 button,
 [type="reset"],
 [type="submit"],
@@ -908,6 +909,7 @@ button,
   outline: 0;
   cursor: pointer;
 }
+a.button:focus,
 button:focus,
 [type="reset"]:focus,
 [type="submit"]:focus,
@@ -921,6 +923,7 @@ button:focus,
 .commons-login:hover, [class*="action-item-large"]:hover {
   text-decoration: none;
 }
+a.button:active,
 button:active,
 [type="reset"]:active,
 [type="submit"]:active,
@@ -932,6 +935,7 @@ button:active,
   box-shadow: inset rgba(0, 0, 0, 0.25) 0 1px 2px 0;
   text-decoration: none;
 }
+a.button::-moz-focus-inner,
 button::-moz-focus-inner,
 [type="reset"]::-moz-focus-inner,
 [type="submit"]::-moz-focus-inner,
@@ -943,6 +947,7 @@ button::-moz-focus-inner,
 }
 
 /* Dimensions for the default button type. */
+a.button,
 button,
 [type="reset"],
 [type="submit"],
@@ -965,6 +970,7 @@ button,
   font-size: 1.2em;
 }
 
+a.button,
 button,
 [type="reset"],
 [type="submit"],
@@ -979,6 +985,7 @@ button,
   border-color: #cbcbcb;
   text-shadow: -1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, 1px 1px 2px white;
 }
+a.button,
 button,
 [type="reset"],
 [type="submit"],
@@ -994,6 +1001,7 @@ button,
 [class*="action-item"]:visited, .commons-login:visited {
   color: #323232;
 }
+a.button:hover,
 button:hover,
 [type="reset"]:hover,
 [type="submit"]:hover,
@@ -1007,8 +1015,10 @@ button:hover,
   background: -o-linear-gradient(#fefefe, #e5e5e5);
   background: linear-gradient(#fefefe, #e5e5e5);
   border-color: #b2b2b2;
+  text-decoration: none;
   text-shadow: -1px 1px 2px #fefefe, -1px -1px 2px #fefefe, 1px -1px 2px #fefefe, 1px 1px 2px #fefefe;
 }
+a.button:focus,
 button:focus,
 [type="reset"]:focus,
 [type="submit"]:focus,
@@ -1027,6 +1037,7 @@ button:focus,
   border-color: #cbcbcb;
   text-shadow: -1px 1px 2px white, -1px -1px 2px white, 1px -1px 2px white, 1px 1px 2px white;
 }
+a.button[disabled],
 button[disabled],
 [disabled][type="reset"],
 [disabled][type="submit"],
@@ -1049,7 +1060,7 @@ button[disabled],
 .action-item-large-active,
 .action-item-large-active[type="reset"],
 .action-item-large-active[type="submit"],
-.action-item-large-active[type="button"], [class*="flag-commons-follow-"] .unflag-action {
+.action-item-large-active[type="button"], [class*="flag-commons-follow-"] a.unflag-action {
   background-color: #f3f3f3;
   -webkit-box-shadow: inset 0.1em 0.1em 0.2em #a6a6a6;
   -moz-box-shadow: inset 0.1em 0.1em 0.2em #a6a6a6;
@@ -1065,16 +1076,16 @@ button[disabled],
 .action-item-large-active,
 .action-item-large-active[type="reset"],
 .action-item-large-active[type="submit"],
-.action-item-large-active[type="button"], [class*="flag-commons-follow-"] .unflag-action, .action-item-active:link,
+.action-item-large-active[type="button"], [class*="flag-commons-follow-"] a.unflag-action, .action-item-active:link,
 .action-item-small-active:link,
-.action-item-large-active:link, [class*="flag-commons-follow-"] .unflag-action:link, .action-item-active:visited,
+.action-item-large-active:link, [class*="flag-commons-follow-"] a.unflag-action:link, .action-item-active:visited,
 .action-item-small-active:visited,
-.action-item-large-active:visited, [class*="flag-commons-follow-"] .unflag-action:visited {
+.action-item-large-active:visited, [class*="flag-commons-follow-"] a.unflag-action:visited {
   color: #272727;
 }
 .action-item-active:hover,
 .action-item-small-active:hover,
-.action-item-large-active:hover, [class*="flag-commons-follow-"] .unflag-action:hover {
+.action-item-large-active:hover, [class*="flag-commons-follow-"] a.unflag-action:hover {
   color: #343434;
   background-color: #e6e6e6;
   -webkit-box-shadow: inset 0.1em 0.1em 0.2em #9a9a9a;
@@ -1085,9 +1096,9 @@ button[disabled],
 }
 .action-item-active:focus,
 .action-item-small-active:focus,
-.action-item-large-active:focus, [class*="flag-commons-follow-"] .unflag-action:focus, .action-item-active:active,
+.action-item-large-active:focus, [class*="flag-commons-follow-"] a.unflag-action:focus, .action-item-active:active,
 .action-item-small-active:active,
-.action-item-large-active:active, [class*="flag-commons-follow-"] .unflag-action:active {
+.action-item-large-active:active, [class*="flag-commons-follow-"] a.unflag-action:active {
   background: #f3f3f3;
   -webkit-box-shadow: inset 0.1em 0.1em 0.2em #a6a6a6;
   -moz-box-shadow: inset 0.1em 0.1em 0.2em #a6a6a6;
@@ -4395,7 +4406,11 @@ body.front.logged-in .view-commons-homepage-content .article.node.node-page .lin
 #quicktabs-commons_follow_ui .flag-email-group a span,
 #quicktabs-commons_follow_ui .flag-email-node a span,
 #quicktabs-commons_follow_ui .flag-email-user a span,
-#quicktabs-commons_follow_ui .flag-email-term a span {
+#quicktabs-commons_follow_ui .flag-email-term a span,
+#quicktabs-commons_follow_ui .flag-email-group span span,
+#quicktabs-commons_follow_ui .flag-email-node span span,
+#quicktabs-commons_follow_ui .flag-email-user span span,
+#quicktabs-commons_follow_ui .flag-email-term span span {
   display: none;
 }
 

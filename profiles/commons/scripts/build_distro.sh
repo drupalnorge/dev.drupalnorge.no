@@ -2,7 +2,7 @@
 #set -e
 
 #modules=(commons_activity_streams commons_featured commons_notices commons_profile_social commons_user_profile_pages commons_body commons_follow commons_notify commons_q_a commons_utility_links commons_bw commons_groups commons_pages commons_radioactivity commons_wikis commons_content_moderation commons_like commons_polls commons_search commons_wysiwyg commons_documents commons_location commons_posts commons_site_homepage commons_events commons_misc commons_profile_base commons_topics commons_social_sharing commons_trusted_contacts)
-themes=(commons_origins)
+#themes=(commons_origins)
 
 merge_repos() {
   cd $BUILD_PATH/commons_profile
@@ -82,40 +82,88 @@ release_notes() {
 }
 
 build_distro() {
-    if [[ -d $BUILD_PATH ]]; then
-        cd $BUILD_PATH
-        #backup the sites directory
-        if [[ -d publish ]]; then
-          tar -czvf $BUILD_PATH/sites-.tar.gz
-
-        rm -rf ./publish
-        # do we have the profile?
-        if [[ -d $BUILD_PATH/commons_profile ]]; then
-          if [[ -d $BUILD_PATH/repos ]]; then
-            rm -f /tmp/commons.tar.gz
-            drush make --no-cache --no-core --contrib-destination --tar $BUILD_PATH/commons_profile/drupal-org.make /tmp/commons
-            drush make --no-cache --prepare-install --drupal-org=core $BUILD_PATH/commons_profile/drupal-org-core.make ./publish
-          else
-            mkdir $BUILD_PATH/repos
-            mkdir $BUILD_PATH/repos/modules
-            mkdir $BUILD_PATH/repos/themes
-            build_distro $BUILD_PATH
-          fi
-          # symlink the profile to our dev copy
-          chmod -R 777 $BUILD_PATH/publish/sites/default
-          rm -rf publish/profiles/commons
-          ln -s $BUILD_PATH/commons_profile publish/profiles/commons
-          cd publish/profiles
-          tar -zxvf /tmp/commons.tar.gz
-          chmod -R 775 $BUILD_PATH/publish/profiles/commons
+  if [[ -d $BUILD_PATH ]]; then
+      cd $BUILD_PATH
+      #backup the sites directory
+      if [[ -d docroot ]]; then
+        rm -rf ./docroot
+      fi
+      # do we have the profile?
+      if [[ -d $BUILD_PATH/commons_profile ]]; then
+        if [[ -d $BUILD_PATH/repos ]]; then
+          rm -f /tmp/commons.tar.gz
+          drush make --no-cache --prepare-install --drupal-org=core $BUILD_PATH/commons_profile/drupal-org-core.make $BUILD_PATH/docroot
+          drush make --no-cache --no-core --contrib-destination --tar $BUILD_PATH/commons_profile/drupal-org.make /tmp/commons
         else
-          git clone --branch 7.x-3.x ${USERNAME}@git.drupal.org:project/commons.git commons_profile
+          mkdir -p $BUILD_PATH/repos/modules/contrib
+          cd $BUILD_PATH/repos/modules/contrib
+          for i in "${modules[@]}"; do
+            echo "bringing in ${i} for $USERNAME";
+            if [[ -n $USERNAME ]]; then
+              git clone ${USERNAME}@git.drupal.org:project/${i}.git
+            else
+              git clone http://git.drupal.org/project/${i}.git
+            fi
+          done
+          cd $BUILD_PATH/repos
+          mkdir -p $BUILD_PATH/repos/themes/contrib
+          cd $BUILD_PATH/repos/themes
+          for i in "${themes[@]}"; do
+            if [[ -n $USERNAME ]]; then
+              git clone ${USERNAME}@git.drupal.org:project/${i}.git
+            else
+              git clone http://git.drupal.org/project/${i}.git
+            fi
+          done
           build_distro $BUILD_PATH
         fi
-    else
-      mkdir $BUILD_PATH
-      build_distro $BUILD_PATH $USERNAME
-    fi
+        # symlink the profile sites folder to our dev copy
+        cd docroot
+        if [[ -d $BUILD_PATH/sites ]]; then
+          rm -rf $BUILD_PATH/docroot/sites
+          ln -s ../sites $BUILD_PATH/docroot/sites
+        else
+          mv $BUILD_PATH/docroot/sites $BUILD_PATH/sites
+          ln -s ../sites $BUILD_PATH/docroot/sites
+        fi
+        chmod -R 777 $BUILD_PATH/docroot/sites/default
+
+        ## put commons profile and modules into the profile folder
+        rm -rf docroot/profiles/commons
+        if [ -a $BUILD_PATH/repos.txt ]; then
+          UNTAR="tar -zxvf /tmp/commons.tar.gz -X $BUILD_PATH/repos.txt"
+        else
+          cd $BUILD_PATH/repos
+          find * -mindepth 1 -maxdepth 2 -type d -not -path ".*" -not -path "modules/.*" -not -path "themes/.*" -not -path "modules/contrib" -not -path "themes/contrib" > /tmp/repos.txt
+          # exclude repos since we're updating already by linking it to the repos directory.
+          UNTAR="tar -zxvf /tmp/commons.tar.gz -X /tmp/repos.txt"
+        fi
+        cd $BUILD_PATH/docroot/profiles
+        eval $UNTAR
+        cd commons
+        ln -s ../../../commons_profile/* .
+        ln -s ../../../../commons_profile/modules/commons ${BUILD_PATH}/docroot/profiles/commons/modules/
+        ln -s ../../../../commons_profile/themes/commons ${BUILD_PATH}/docroot/profiles/commons/themes/
+        for line in $(cat $BUILD_PATH/repos.txt); do
+          ln -s ../../../../../repos/${line} ${BUILD_PATH}/docroot/profiles/commons/$(echo ${line} | awk -F/ '{print $1}')/contrib/
+        done
+        chmod -R 775 $BUILD_PATH/docroot/profiles/commons
+      else
+        git clone --branch 7.x-3.x ${USERNAME}@git.drupal.org:project/commons.git commons_profile
+        build_distro $BUILD_PATH
+      fi
+  else
+    mkdir $BUILD_PATH
+    build_distro $BUILD_PATH $USERNAME
+  fi
+}
+
+site_install() {
+  read -p "You're about to DESTROY all data for site ${SITE} Are you sure? " -n 1 -r
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    cd ${BUILD_PATH}/docroot/sites/${SITE}
+    drush -y sql-drop
+    drush site-install --site-name=${SITE} --account-name=admin --account-pass=${ADMIN_PASS} --account-mail=${ADMIN_EMAIL} --site-mail=commons_site@example.com -v -y commons commons_anonymous_welcome_text_form.commons_install_example_content=${DEMO_CONTENT} commons_anonymous_welcome_text_form.commons_anonymous_welcome_title="Commons Example Site" commons_anonymous_welcome_text_form.commons_anonymous_welcome_body="Using the site-install version of commons." commons_create_first_group.commons_first_group_title="Sales Group" commons_create_first_group.commons_first_group_body="This is the sales group from site-install."
   fi
 }
 
@@ -126,13 +174,13 @@ update() {
     # do we have the profile?
     if [[ -d $DOCROOT/profiles/commons ]]; then
       # do we have an installed commons profile?
-        rm -f /tmp/publish.tar.gz
+        rm -f /tmp/docroot.tar.gz
         rm -f /tmp/commons.tar.gz
-        drush make --no-cache --tar --drupal-org=core profiles/commons/drupal-org-core.make /tmp/publish
+        drush make --no-cache --tar --drupal-org=core profiles/commons/drupal-org-core.make /tmp/docroot
         drush make --no-core --no-cache --tar --drupal-org profiles/commons/drupal-org.make /tmp/commons
         cd ..
-        tar -zxvf /tmp/publish.tar.gz
-        cd publish/profiles/commons/modules/contrib
+        tar -zxvf /tmp/docroot.tar.gz
+        cd docroot/profiles/commons/modules/contrib
         # remove the symlinks in the repos before we execute
         find . -type l | awk -F/ '{print $2}' > /tmp/repos.txt
         cd $DOCROOT/profiles
@@ -148,6 +196,34 @@ update() {
 }
 
 case $1 in
+  site-install)
+    if [[ -n $2 ]] && [[ -n $3 ]]; then
+      BUILD_PATH=$2
+    else
+      echo "Usage build_distro.sh site-install [build_path] [site] [admin-email] [admin-pass]"
+    fi
+    if [[ -n $3 ]]; then
+      SITE=$3
+    else
+      SITE='default'
+    fi
+    if [[ -n $4 ]]; then
+      DEMO_CONTENT='TRUE'
+    else
+      DEMO_CONTENT='FALSE'
+    fi
+    if [[ -n $5 ]]; then
+      ADMIN_EMAIL=$4
+    else
+      ADMIN_EMAIL='admin@example.com'
+    fi
+    if [[ -n $6 ]]; then
+      ADMIN_PASS=$4
+    else
+      ADMIN_PASS='admin'
+    fi
+
+    site_install $BUILD_PATH $SITE $DEMO_CONTENT $ADMIN_EMAIL $ADMIN_PASS;;
   pull)
     if [[ -n $2 ]]; then
       BUILD_PATH=$2

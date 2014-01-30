@@ -18,14 +18,16 @@ features[user_permission][] = access user profiles
 features[user_permission][] = post comments
 features[user_permission][] = skip comment approval
 features[user_permission][] = view own unpublished content
+features[user_role][] = administrator
+features[variable][] = navbar_libraries_variants
 features[variable][] = theme_adaptivetheme_settings
 features[variable][] = theme_commons_origins_settings
 features[variable][] = user_register
 features_exclude[dependencies][page_manager] = page_manager
 
-; Information added by  packaging script on 2013-11-22
-version = "7.x-3.5"
+; Information added by Drupal.org packaging script on 2014-01-16
+version = "7.x-3.8"
 core = "7.x"
 project = "commons"
-datestamp = "1385164710"
+datestamp = "1389902308"
 

@@ -22,10 +22,10 @@ files[] = includes/views/handlers/commons_follow_plugin_argument_default_node.in
 files[] = includes/views/handlers/commons_follow_plugin_argument_default_message.inc
 files[] = includes/views/handlers/commons_follow_user_follow_filter.inc
 files[] = includes/views/handlers/commons_follow_user_follow_filter_message.inc
-
-; Information added by  packaging script on 2013-11-22
-version = "7.x-3.5"
+files[] = includes/views/handlers/commons_follow_handler_field_ops.inc
+; Information added by Drupal.org packaging script on 2014-01-16
+version = "7.x-3.8"
 core = "7.x"
 project = "commons"
-datestamp = "1385164710"
+datestamp = "1389902308"
 

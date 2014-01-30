@@ -857,11 +857,11 @@ function og_form_group_manager_validate($form, &$form_state) {
  *   The entity from which to extract values.
  * @param $entity_type
  *   The entity type.
- * @param $gid
+ * @param $rid
  *   The default OG role ID.
  *
  * @return
- *   The corresponding overridden OG role ID, if any.
+ *   The corresponding overridden OG role ID, or default.
  */
 function og_roles_get_overridden_role($entity, $entity_type, $rid) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
@@ -869,13 +869,17 @@ function og_roles_get_overridden_role($entity, $entity_type, $rid) {
   $og_overridden_roles = og_roles($entity_type, $bundle, $id);
   // Get og default roles.
   $og_default_roles = og_roles($entity_type, $bundle, 0, FALSE, FALSE);
-  $role_name = $og_default_roles[$rid];
-  foreach ($og_overridden_roles as $overridden_rid => $overridden_role) {
-    if ($overridden_role == $role_name) {
-      $rid = $overridden_rid;
-      return $rid;
+  if(isset($og_default_roles[$rid])) {
+    $role_name = $og_default_roles[$rid];
+    foreach ($og_overridden_roles as $overridden_rid => $overridden_role) {
+      if ($overridden_role == $role_name) {
+        $rid = $overridden_rid;
+        return $rid;
+      }
     }
   }
+  //Return the default $rid if no overridden one is found.
+  return $rid;
 }
 
 /**

@@ -12,9 +12,15 @@
 /**
  * Store the open menu tray.
  */
-var activeItem = Drupal.settings.basePath + Drupal.settings.currentPath;
 
-  $.fn.drupalNavbarMenu = function () {
+  $.fn.drupalNavbarMenu = function (options) {
+
+    // Merge options onto defaults.
+    var settings = $.extend({}, {
+      twisties: true,
+      activeTrail: true,
+      listLevels: true
+    }, options);
 
     var ui = {
       'handleOpen': Drupal.t('Extend'),
@@ -27,17 +33,15 @@ var activeItem = Drupal.settings.basePath + Drupal.settings.currentPath;
      *   A jQuery Event object.
      */
     function toggleClickHandler (event) {
-      var $toggle = $(event.target);
-      var $item = $toggle.closest('li');
-      // Toggle the list item.
-      toggleList($item);
-      // Close open sibling menus.
-      var $openItems = $item.siblings().filter('.open');
-      toggleList($openItems, false);
-      // Save link of the closest open item through a unique selector.
-      var href = $toggle.siblings('a[href]').attr('href');
-
-      event.stopPropagation();
+      var $toggle = $(event.target).filter('.navbar-handle');
+      if ($toggle.length) {
+        var $item = $toggle.closest('li');
+        // Toggle the list item.
+        toggleList($item);
+        // Close open sibling menus.
+        var $openItems = $item.siblings().filter('.open');
+        toggleList($openItems, false);
+      }
     }
     /**
      * Toggle the open/close state of a list is a menu.
@@ -50,7 +54,7 @@ var activeItem = Drupal.settings.basePath + Drupal.settings.currentPath;
      *   simply toggling its presence.
      */
     function toggleList ($item, switcher) {
-      var $toggle = $item.find('> .box > .handle');
+      var $toggle = $item.children('.navbar-box').children('.navbar-handle');
       switcher = (typeof switcher !== 'undefined') ? switcher : !$item.hasClass('open');
       // Toggle the item open state.
       $item.toggleClass('open', switcher);
@@ -63,34 +67,46 @@ var activeItem = Drupal.settings.basePath + Drupal.settings.currentPath;
         .text((switcher) ?  ui.handleClose : ui.handleOpen);
     }
     /**
-     * Add markup to the menu elements.
+     * Wrap menu links is standardized markup.
      *
      * Items with sub-elements have a list toggle attached to them. Menu item
      * links and the corresponding list toggle are wrapped with in a div
-     * classed with .box. The .box div provides a positioning context for the
-     * item list toggle.
+     * classed with .navbar-box. The .navbar-box div provides a positioning
+     * context for the item list toggle twisty.
      *
      * @param {jQuery} $menu
      *   The root of the menu to be initialized.
      */
-    function initItems ($menu) {
-      var options = {
-        'class': 'icon handle',
-        'action': ui.handleOpen,
-        'text': ''
-      };
+    function processMenuLinks ($menu, settings) {
       // Initialize items and their links.
-      $menu.find('li > a').wrap('<div class="box">');
+      $menu
+        .find('li > a, li > span')
+        .once('navbar-menu')
+        .addClass('navbar-menu-item')
+        .wrap('<div class="navbar-box">');
         // Add a handle to each list item if it has a menu.
-      $menu.find('li').each(function (index, element) {
-          var $item = $(element);
-          if ($item.find('> ul.menu').length) {
-            var $box = $item.find('> .box');
-            options.text = Drupal.t('@label', {'@label': $box.find('a').text()});
-            $item.find('> .box')
-              .append(Drupal.theme('navbarMenuItemToggle', options));
-          }
-        });
+
+      if (settings.twisties) {
+        var options = {
+          'class': 'navbar-icon navbar-handle',
+          'action': ui.handleOpen,
+          'text': ''
+        };
+        $menu
+          .find('li')
+          .each(function (index, element) {
+            var $item = $(element);
+            var $menus = $item.children('ul.menu').once('navbar-menu');
+            if ($menus.length) {
+              var $box = $item.children('.navbar-box');
+              options.text = Drupal.t('@label', {'@label': $box.find('a').text()});
+              $item
+                .addClass('navbar-twisty')
+                .children('.navbar-box')
+                .append(Drupal.theme('navbarMenuItemToggle', options));
+            }
+          });
+      }
     }
     /**
      * Adds a level class to each list based on its depth in the menu.
@@ -106,8 +122,10 @@ var activeItem = Drupal.settings.basePath + Drupal.settings.currentPath;
      */
     function markListLevels ($lists, level) {
       level = (!level) ? 1 : level;
-      var $lis = $lists.find('> li').addClass('level-' + level);
-      $lists = $lis.find('> ul');
+      $lists = $lists.children('li')
+        .addClass('navbar-level-' + level)
+        // Retrieve child menus.
+        .children('ul');
       if ($lists.length) {
         markListLevels($lists, level + 1);
       }
@@ -122,29 +140,60 @@ var activeItem = Drupal.settings.basePath + Drupal.settings.currentPath;
      *   The root of the menu.
      */
     function openActiveItem ($menu) {
-      var pathItem = $menu.find('a[href="' + location.pathname + '"]');
-      if (pathItem.length && !activeItem) {
-        activeItem = location.pathname;
-      }
-      if (activeItem) {
-        var $activeItem = $menu.find('a[href="' + activeItem + '"]').addClass('active');
-        var $activeTrail = $activeItem.parentsUntil('.root', 'li').addClass('active-trail');
+      var pathname = location.pathname;
+      // Get all menu items that start with the location path.
+      var $pathItem = $menu.find('a[href^="' + pathname + '"]');
+
+      // Clear any existing menu trails.
+      $menu.find('.navbar-active, .navbar-active-trail').removeClass('navbar-active navbar-active-trail');
+      /**
+       * Adds the navbar-active class active menu item.
+       *
+       * In addition a navbar-active-trail class is added to all parent menu
+       * list items.
+       *
+       * @param jQuery $pathItem
+       *   A jQuery object of the active menu item.
+       */
+      function markItemTrail ($pathItem) {
+        $pathItem.addClass('navbar-active');
+        var $activeTrail = $pathItem.parentsUntil('.navbar-root', 'li').addClass('navbar-active-trail');
         toggleList($activeTrail, true);
       }
-    }
 
+      if ($pathItem.length) {
+        // If the path yields more than one match, try to narrow the items down
+        // by the params and hash.
+        if ($pathItem.length > 1) {
+          for (var i = 0, aspects = ['', location.search, location.hash, (location.search + location.hash)], len = aspects.length; i < len; i++) {
+            $pathItem = $menu.find('a[href="' + pathname + aspects[i] + '"]');
+            if ($pathItem.length === 1) {
+              break;
+            }
+          }
+        }
+        if ($pathItem.length === 1) {
+          markItemTrail($pathItem);
+        }
+      }
+    }
     // Return the jQuery object.
     return this.each(function (selector) {
-      var $menu = $(this).once('navbar-menu');
-      if ($menu.length) {
-        $menu.addClass('root');
-        initItems($menu);
-        markListLevels($menu);
-        // Attach handlers.
-        // Bind event handlers.
+      var $menu = $(this);
+      var rootNotProcessed = $menu.once('navbar-menu');
+      if (rootNotProcessed.length) {
         $menu
-          .delegate('.handle', 'click.navbar', toggleClickHandler);
-        // Restore previous and active states.
+          .addClass('navbar-menu-root navbar-root')
+          .on('click.navbar', toggleClickHandler);
+      }
+      // Process components of the menu.
+      processMenuLinks($menu, settings);
+      // Add a menu level class to each menu item.
+      if (settings.listLevels) {
+        markListLevels($menu);
+      }
+      // Restore previous and active states.
+      if (settings.activeTrail) {
         openActiveItem($menu);
       }
     });

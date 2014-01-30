@@ -4,9 +4,10 @@ package = Other
 core = 7.x
 hidden = TRUE
 
-; Information added by drupal.org packaging script on 2013-06-15
-version = "7.x-1.1"
+
+; Information added by drush on 2014-01-16
+version = "7.x-1.1+1-dev"
 core = "7.x"
 project = "breakpoints"
-datestamp = "1371310550"
+datestamp = "1389902343"
 

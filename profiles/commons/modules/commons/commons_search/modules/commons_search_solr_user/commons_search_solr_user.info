@@ -12,9 +12,9 @@ features[apachesolr_search_page][] = user_search
 features[ctools][] = apachesolr_search:apachesolr_search_defaults:3
 features[features_api][] = api:1
 features[menu_links][] = main-menu:people
-; Information added by  packaging script on 2013-11-22
-version = "7.x-3.5"
+; Information added by Drupal.org packaging script on 2014-01-16
+version = "7.x-3.8"
 core = "7.x"
 project = "commons"
-datestamp = "1385164710"
+datestamp = "1389902308"
 

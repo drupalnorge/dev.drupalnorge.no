@@ -14,6 +14,7 @@ function commons_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
   if($phase == 'install') {
+
     // Test PHP minimum execution time
     $requirements['php_max_execution_time'] = array(
       'title' => $t('PHP Max Execution Time'),
@@ -24,6 +25,25 @@ function commons_requirements($phase) {
     if ($max_execution_time && $max_execution_time < DRUPAL_MINIMUM_MAX_EXECUTION_TIME) {
       $requirements['php_max_execution_time']['description'] = $t('Your PHP execution time is too low, please set it greater than or equal to %time seconds.', array('%time' => DRUPAL_MINIMUM_MAX_EXECUTION_TIME));
       $requirements['php_max_execution_time']['severity'] = REQUIREMENT_ERROR;
+    }
+
+    if(ini_get('apc.shm_size') != NULL) {
+      // Check for apc.shm_size = 96mb
+      $requirements['apc_shm_size'] = array(
+        'title' => $t('APC shim size'),
+        'value' => ini_get('apc.shm_size'),
+      );
+
+      $shm_size = preg_split('/[a-zA-Z]/', ini_get('apc.shm_size'));
+      $shm_size = $shm_size[0];
+
+      // only check if APC var is being set somewhere (usually apc.ini).
+      // throw error if there is less than 96MB available
+      if ($shm_size && $shm_size < COMMONS_MINIMUM_APC_CACHE) {
+        $requirements['apc_shm_size']['description'] = $t('APC is installed but %shm_size is not enough APC cache to successfully install Drupal Commons.
+           Find your <em>apc.ini</em> file and change the <em>apc.shm_size</em> value to at least <em>%min_shm_size</em>.', array('%shm_size' => $shm_size . 'M', '%min_shm_size' => COMMONS_MINIMUM_APC_CACHE . 'M'));
+        $requirements['apc_shm_size']['severity'] = REQUIREMENT_ERROR;
+      }
     }
   }
   return $requirements;
@@ -38,7 +58,7 @@ function commons_requirements($phase) {
  */
 function commons_install() {
   // Enable the Origins theme and set it as the default.
-  theme_enable(array('adaptivetheme', 'commons_origins', 'adaptivetheme_admin'));
+  theme_enable(array('adaptivetheme', 'commons_origins'));
 
     // The Bartik theme is automatically enabled during installation. Disable it.
   db_update('system')
@@ -50,7 +70,7 @@ function commons_install() {
   // Set the default and administration themes.
   variable_set('theme_default', 'commons_origins');
   // Set a default administrative theme:
-  variable_set('admin_theme', 'adaptivetheme_admin');
+  variable_set('admin_theme', 'ember');
   variable_set('node_admin_theme', FALSE);
 
   // Do not use the administration theme when editing or creating content.
@@ -84,19 +104,6 @@ function commons_install() {
     'title' => '<none>',
   );
   drupal_write_record('block', $search_block);
-
-  // Create a default role for site administrators, with all available permissions assigned.
-  $admin_role = new stdClass();
-  $admin_role->name = 'administrator';
-  $admin_role->weight = 2;
-  user_role_save($admin_role);
-  // Set this as the administrator role.
-  variable_set('user_admin_role', $admin_role->rid);
-
-  // Assign user 1 the "administrator" role.
-  db_insert('users_roles')
-    ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
-    ->execute();
 
   // AdaptiveTheme requires that the system theme settings form
   // be submitted in order for its themes' settings to be properly set
@@ -219,5 +226,24 @@ function commons_update_3108() {
     'commons_q_a' => array('views_view')
   );
   features_revert($revert);
+  return array();
+}
+
+/**
+ * Replace the Placeholder module with the Elements module.
+ */
+function commons_update_3109() {
+  if (module_exists('placeholder')) {
+    module_disable(array('placeholder'));
+  }
+  module_enable(array('elements'));
+  return array();
+}
+
+/**
+ * Change the administration theme to Ember.
+ */
+function commons_update_3111() {
+  variable_set('admin_theme', 'ember');
   return array();
 }
