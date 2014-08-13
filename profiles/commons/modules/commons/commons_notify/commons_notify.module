@@ -20,8 +20,10 @@ function commons_notify_node_insert($node) {
 
 /**
  * Send a notification for newly created nodes.
+ *
  * This function is registered as a shutdown function
  * in commons_notify_node_insert.
+ *
  * Note that shutdown functions run after drupal_set_message() messages are
  * displayed, so you'll need to use another method such as watchdog() logging
  * if you wish to add debugging messages to this function.
@@ -45,7 +47,7 @@ function commons_notify_send_message_on_shutdown($node) {
   if (!isset($node->og_group_ref[LANGUAGE_NONE][0]['target_id'])) {
     $message_type = 'commons_notify_node_created_no_groups';
   }
-  // Allow other modules to specify an alternative messagge type to use.
+  // Allow other modules to specify an alternative message type to use.
   $hook = 'node_insert';
   drupal_alter('commons_notify_message_selection', $message_type, $hook, $node);
   $account = user_load($node->uid);
@@ -100,66 +102,4 @@ function commons_notify_comment_insert($comment) {
     ),
   );
   message_subscribe_send_message('comment', $comment, $message, array('email' => $options));
-}
-
-/**
- * Implements hook_commons_utility_links().
- *
- * Add unread-invitations and unread-messages notifications to utility links.
- */
-function commons_notify_commons_utility_links_alter(&$links) {
-  global $user;
-
-  if (user_is_anonymous()) {
-    // Anonymous user.
-    return;
-  }
-
-  $new_links = array(
-    'name' => $links['name'],
-  );
-
-  $account = $user;
-
-  $unread_invitations = 0;
-  if (module_exists('commons_trusted_contacts')) {
-    $unread_invitations = count(commons_trusted_contacts_get_pending_invitations($account->uid));
-  }
-
-  $unread_messages = 0;
-  if (module_exists('privatemsg')) {
-    $unread_messages = privatemsg_unread_count($account);
-  }
-
-
-  if (empty($unread_invitations) && empty($unread_messages)) {
-    // Provide a default mailbox icon pointing to the private messages UI
-    // when there are no unread messages or invitations.
-    $new_links['no-unread-messages'] = array(
-      'href' => 'user/' . $user->uid . '/contacts',
-      'query' => array('qt-commons_trusted_contacts' => 'messages'),
-      'title' => t('No unread messages'),
-    );
-  }
-
-  if ($unread_invitations) {
-    $new_links['unread-invitations']= array(
-      'href' => 'user/' . $user->uid . '/contacts',
-      'query' => array('qt-commons_trusted_contacts' => 'invitations'),
-      'title' => format_plural($unread_invitations, '1 invitation', '@count invitations'),
-    );
-  }
-
-  if ($unread_messages) {
-    $new_links['unread-messages']= array(
-      'href' => 'user/' . $user->uid . '/contacts',
-      'query' => array('qt-commons_trusted_contacts' => 'messages'),
-      'title' => format_plural($unread_messages, '1 message', '@count messages'),
-    );
-  }
-
-  $new_links['logout'] = $links['logout'];
-  $new_links['settings'] = $links['settings'];
-
-  $links = $new_links;
 }

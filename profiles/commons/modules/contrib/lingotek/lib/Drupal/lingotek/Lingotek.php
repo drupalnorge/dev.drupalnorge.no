@@ -246,7 +246,7 @@ class Lingotek {
           $loc = strtoupper(substr($drupal_language_code, $dash_pos + 1));
           $lingotek_locale = $lang . '_' . $loc;
         } // If it is generic then use the mapping to pick a specific 
-        else if (isset(self::$language_map[$drupal_language_code])) {
+        elseif (isset(self::$language_map[$drupal_language_code])) {
           $lingotek_locale = self::$language_map[$drupal_language_code];
         }
       }
@@ -362,8 +362,8 @@ class Lingotek {
    * @return array
    *   An array of Lingotek language codes.
    */
-  public static function availableLanguageTargets($pluck_field = NULL, $include_disabled = FALSE, $lingotek_locale_to_exclude = NULL) {
-    lingotek_add_missing_locales();
+  public static function getLanguages($pluck_field = NULL, $include_disabled = FALSE, $lingotek_locale_to_exclude = NULL) {
+    lingotek_add_missing_locales(FALSE);
     $languages = array();
 
     foreach (language_list() as $target_language) {
@@ -373,19 +373,19 @@ class Lingotek {
       if ($target_language->lingotek_enabled) { // include all languages enabled
         $languages[$target_language->lingotek_locale] = $language;
       }
-      else if ($include_disabled) { // include all languages, including disabled (lingotek_enabled is 0)
+      elseif ($include_disabled) { // include all languages, including disabled (lingotek_enabled is 0)
         $languages[$target_language->lingotek_locale] = $language;
       }
     }
     return $languages;
   }
 
-  public static function availableLanguageTargetsWithoutSource($source_lingotek_locale) {
-    return self::availableLanguageTargets('lingotek_locale', FALSE, $source_lingotek_locale);
+  public static function getLanguagesWithoutSource($source_lingotek_locale) {
+    return self::getLanguages('lingotek_locale', FALSE, $source_lingotek_locale);
   }
 
-  public static function availableLanguageTargetsWithoutSourceAsJSON($source_lingotek_locale) {
-    return drupal_json_encode(array_values(self::availableLanguageTargets('lingotek_locale', FALSE, $source_lingotek_locale)));
+  public static function getLanguagesWithoutSourceAsJSON($source_lingotek_locale) {
+    return drupal_json_encode(array_values(self::getLanguages('lingotek_locale', FALSE, $source_lingotek_locale)));
   }
 
 }

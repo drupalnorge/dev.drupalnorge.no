@@ -37,12 +37,11 @@ function adaptivetheme_preprocess_html(&$vars) {
   $vars['doctype'] = '<!DOCTYPE html>' . "\n";
   $vars['rdf_profile'] = '';
 
-  // Use a proper attributes array for the html attributes
+  // Use a proper attributes array for the html attributes.
+  // You can add more attributes to the html elment, for example in a sub-theme you can do this:
+  // $vars['html_attributes_array']['xmlns:og'][] = 'http://opengraphprotocol.org/schema/';
   $vars['html_attributes_array']['lang'][] = $language->language;
   $vars['html_attributes_array']['dir'][] = $language->dir;
-
-  // You can add more attributes to the html elment, for example in a sub-theme you can do this:
-  //$vars['html_attributes_array']['xmlns:og'][] = 'http://opengraphprotocol.org/schema/';
 
   // Convert RDF Namespaces into structured data using drupal_attributes.
   $vars['rdf_namespaces'] = array();
@@ -59,26 +58,27 @@ function adaptivetheme_preprocess_html(&$vars) {
   // Load Layout
   at_load_layout_css($path, $theme_name);
 
-  // Add layout settings as JS settings
+  // Add layout settings as JS settings, we use this for responsive JS,
+  // such as the Menu Toggle javascript.
   at_load_layout_js_settings($theme_name);
 
   // Load Responsive Styles.
-  if (at_get_setting('disable_responsive_styles', $theme_name) === 0) {
+  if (at_get_setting('disable_responsive_styles', $theme_name) == 0) {
     at_load_responsive_css($path, $theme_name);
   }
 
   // Load fonts and/or Custom CSS and the menu toggle files
-  if (at_get_setting('enable_extensions', $theme_name) === 1) {
+  if (at_get_setting('enable_extensions', $theme_name) == 1) {
     // Fonts CSS
-    if (at_get_setting('enable_font_settings', $theme_name) === 1) {
+    if (at_get_setting('enable_font_settings', $theme_name) == 1) {
       at_load_fonts($path, $theme_name);
     }
     // Custom CSS
-    if (at_get_setting('enable_custom_css', $theme_name) === 1) {
+    if (at_get_setting('enable_custom_css', $theme_name) == 1) {
       at_load_custom_css($path, $theme_name);
     }
     // Load the menu toggle js and css files
-    if (at_get_setting('enable_menu_toggle', $theme_name) === 1) {
+    if (at_get_setting('enable_menu_toggle', $theme_name) == 1) {
       at_load_menu_toggle($path, $theme_name);
     }
     // Load Extension Settings CSS
@@ -91,7 +91,7 @@ function adaptivetheme_preprocess_html(&$vars) {
   }
 
   // Load specific subtheme scripts
-  if (at_get_setting('load_onmediaqueryjs', $theme_name) === 1) {
+  if (at_get_setting('load_onmediaqueryjs', $theme_name) == 1) {
     at_load_subtheme_script('scripts/media_queries.js', $theme_name, 'footer', '100');
   }
 
@@ -115,12 +115,12 @@ function adaptivetheme_preprocess_html(&$vars) {
   // Do some legacy stuff for 7.x-2.x themes that have google webfonts running
   // on the old system. Scan for the existence of a "release" key and
   // conditionally load google.web.fonts.inc
-  if (!isset($info['release']) || $info['release'] === '7.x-2.x') {
+  if (!isset($info['release']) || $info['release'] == '7.x-2.x') {
     include_once(drupal_get_path('theme', 'adaptivetheme') . '/inc/google.web.fonts.inc');
   }
 
-  // Load debuggers if enabled. Panels page debugger is a menu item, see alter.inc
-  if (at_get_setting('expose_regions', $theme_name) === 1 || at_get_setting('show_window_size', $theme_name) === 1 || at_get_setting('load_all_panels', $theme_name) === 1) {
+  // Load debuggers if enabled.
+  if (at_get_setting('expose_regions', $theme_name) == 1 || at_get_setting('show_window_size', $theme_name) == 1 || at_get_setting('load_all_panels', $theme_name) == 1) {
     at_load_debuggers($theme_name);
   }
 }
@@ -133,15 +133,19 @@ function adaptivetheme_preprocess_page(&$vars) {
   $theme_name = $theme_key;
 
   // Set up logo element
-  if (at_get_setting('toggle_logo', $theme_name) === 1) {
-    $vars['site_logo'] = drupal_static('adaptivetheme_preprocess_page_site_logo');
+  if (at_get_setting('toggle_logo', $theme_name) == 1) {
+    $vars['site_logo'] = &drupal_static('adaptivetheme_preprocess_page_site_logo');
     if (empty($vars['site_logo'])) {
-      $logo_path = check_url($vars['logo']);
-      $logo_alt = check_plain(variable_get('site_name', t('Site logo')));
-      $logo_title = at_get_setting('logo_title') ? $logo_alt : t('Home page');
-      $logo_vars = array('path' => $logo_path, 'alt' => $logo_alt, 'attributes' => array('class' => 'site-logo'));
-      $vars['logo_img'] = theme('image', $logo_vars);
-      $vars['site_logo'] = $vars['logo_img'] ? l($vars['logo_img'], '<front>', array('attributes' => array('title' => $logo_title), 'html' => TRUE)) : '';
+      $logo_image_path = check_url($vars['logo']);
+      $logo_image_alt = check_plain(variable_get('site_name', t('Home page')));
+      $logo_image_vars = array('path' => $logo_image_path, 'alt' => $logo_image_alt, 'attributes' => array('class' => 'site-logo'));
+      $vars['logo_img'] = theme('image', $logo_image_vars);
+      if (at_get_setting('logo_title') == 1) {
+        $vars['site_logo'] = $vars['logo_img'] ? l($vars['logo_img'], '<front>', array('attributes' => array('title' => $logo_image_alt), 'html' => TRUE)) : '';
+      }
+      else {
+        $vars['site_logo'] = $vars['logo_img'] ? l($vars['logo_img'], '<front>', array('html' => TRUE)) : '';
+      }
     }
     // Maintain backwards compatibility with 7.x-2.x sub-themes
     $vars['linked_site_logo'] = $vars['site_logo'];
@@ -164,7 +168,7 @@ function adaptivetheme_preprocess_page(&$vars) {
   $vars['site_name_attributes_array'] = array();
   $vars['visibility'] = '';
   $vars['hide_site_name'] = FALSE;
-  if (at_get_setting('toggle_name', $theme_name) === 0) {
+  if (at_get_setting('toggle_name', $theme_name) == 0) {
     // Keep the visibility variable to maintain backwards compatibility
     $vars['visibility'] = 'element-invisible';
     $vars['site_name_attributes_array']['class'][] = $vars['visibility'];
@@ -180,9 +184,10 @@ function adaptivetheme_preprocess_page(&$vars) {
         'class' => array('menu', 'primary-menu', 'clearfix'),
        ),
       'heading' => array(
-        'text' => $main_menu_title,
+        'text'  => $main_menu_title,
         'level' => 'h2',
         'class' => array('element-invisible'),
+        'id'    => array('primary-menu'),
       )
     ));
   }
@@ -195,9 +200,10 @@ function adaptivetheme_preprocess_page(&$vars) {
         'class' => array('menu', 'secondary-menu', 'clearfix'),
       ),
       'heading' => array(
-        'text' => t('Secondary menu'),
+        'text'  => t('Secondary menu'),
         'level' => 'h2',
         'class' => array('element-invisible'),
+        'id'    => 'secondary-menu',
       )
     ));
   }
@@ -213,7 +219,7 @@ function adaptivetheme_preprocess_page(&$vars) {
   }
 
   // Process enabled Extensions
-  if (at_get_setting('enable_extensions', $theme_name) === 1) {
+  if (at_get_setting('enable_extensions', $theme_name) == 1) {
     // Generate page classes, in AT Core these are all Extensions
     if ($page_classes = at_generate_page_classes($vars, $theme_name)) {
       foreach ($page_classes as $class_name) {
@@ -221,16 +227,16 @@ function adaptivetheme_preprocess_page(&$vars) {
       }
     }
     // Process modify markup settings
-    if (at_get_setting('enable_markup_overides', $theme_name) === 1) {
+    if (at_get_setting('enable_markup_overides', $theme_name) == 1) {
       // Remove the infernal feed icons
-      if (at_get_setting('feed_icons_hide', $theme_name) === 1) {
+      if (at_get_setting('feed_icons_hide', $theme_name) == 1) {
         $vars['feed_icons'] = '';
       }
     }
   }
 
-  // Strip stupid contextual-links-region class, wtf?
-  $vars['classes_array'] = array_values(array_diff($vars['classes_array'], array('contextual-links-region')));
+  // Strip stupid contextual-links-region class.
+  //$vars['classes_array'] = array_values(array_diff($vars['classes_array'], array('contextual-links-region')));
 
   // page attributes
   $vars['page_attributes_array']['id'][] = 'page';
@@ -241,18 +247,18 @@ function adaptivetheme_preprocess_page(&$vars) {
   $vars['header_attributes_array']['class'][] = 'clearfix';
   $vars['header_attributes_array']['role'][] = 'banner';
 
-  // hgroup attributes
-  $vars['hgroup_attributes_array'] = array();
-  if (!$vars['site_slogan'] && $vars['hide_site_name']) {
-    $vars['hgroup_attributes_array']['class'][] = $vars['visibility'];
-  }
-
   // branding attributes
   $vars['branding_attributes_array']['id'][] = 'branding';
   $vars['branding_attributes_array']['class'][] = 'branding-elements';
   $vars['branding_attributes_array']['class'][] = 'clearfix';
 
-  // hgroup attributes
+  // site name and slogan attributes (wrapper div)
+  // hgroup maintains BC layer for pre 7.x-3.2 themes
+  $vars['hgroup_attributes_array'] = array();
+  if (!$vars['site_slogan'] && $vars['hide_site_name']) {
+    $vars['hgroup_attributes_array']['class'][] = $vars['visibility'];
+  }
+  $vars['hgroup_attributes_array']['class'][] = 'h-group';
   $vars['hgroup_attributes_array']['id'][] = 'name-and-slogan';
 
   // site name attributes
@@ -271,19 +277,22 @@ function adaptivetheme_preprocess_page(&$vars) {
   $vars['footer_attributes_array']['role'][] = 'contentinfo';
 
   // Attribution variable used in admin theme and some others
-  $vars['attribution'] = "<small class=\"attribution\"><a href=\"http://adaptivethemes.com\">Premium Drupal Themes</a></small>";
+  $vars['attribution'] = '';
+  if (at_get_setting('attribution_toggle', $theme_name) == 1) {
+    $vars['attribution'] = "<small class=\"attribution\">Premium Drupal Theme by <a href=\"http://adaptivethemes.com\">Adaptivethemes.com</a></small>";
+  }
 
   // Work around a perculier bug/feature(?) in Drupal 7 which incorrectly sets
   // the page title to "User account" for all three of these pages.
   $title = drupal_get_title();
-  if (arg(0) === 'user' && $title == t('User account')) {
-    if (arg(1) === 'login' || arg(1) == '') {
+  if (arg(0) == 'user' && $title == t('User account')) {
+    if (arg(1) == 'login' || arg(1) == '') {
       drupal_set_title(t('User login'));
     }
-    if (arg(1) === 'password') {
+    if (arg(1) == 'password') {
       drupal_set_title(t('Request new password'));
     }
-    if (arg(1) === 'register') {
+    if (arg(1) == 'register') {
       drupal_set_title(t('Create new account'));
     }
   }
@@ -299,15 +308,15 @@ function adaptivetheme_preprocess_region(&$vars) {
   $region = $vars['region'];
 
   // Add a "sidebar" class to sidebar regions
-  if (strpos($region, 'sidebar_') === 0) {
+  if ($region == 'sidebar_first' || $region == 'sidebar_second') {
     $vars['classes_array'][] = 'sidebar';
     // Allow a region-specific template to override the region--sidebar suggestion.
     array_unshift($vars['theme_hook_suggestions'], 'region__sidebar');
   }
 
   // Float region block classes
-  if (at_get_setting('enable_extensions', $theme_name) === 1) {
-    if (at_get_setting('enable_float_region_blocks', $theme_name) === 1) {
+  if (at_get_setting('enable_extensions', $theme_name) == 1) {
+    if (at_get_setting('enable_float_region_blocks', $theme_name) == 1) {
 
       // Make sure there is something set for the region, get the column count
       if ($float_blocks_regions_class = at_get_setting('float_block_' . $region)) {
@@ -367,6 +376,7 @@ function adaptivetheme_preprocess_region(&$vars) {
  */
 function adaptivetheme_preprocess_block(&$vars) {
   global $theme_key;
+  global $user;
   $theme_name = $theme_key;
 
   // Block subject, under certain conditions, is not set
@@ -392,7 +402,7 @@ function adaptivetheme_preprocess_block(&$vars) {
   }
 
   // Search is never a section, its just a div
-  if ($vars['block_html_id'] === 'block-search-form') {
+  if ($vars['block_html_id'] == 'block-search-form') {
     $vars['tag'] = 'div';
   }
 
@@ -414,7 +424,7 @@ function adaptivetheme_preprocess_block(&$vars) {
   }
 
   // The menu bar region gets special treatment for the block template
-  if ($vars['block']->region === 'menu_bar') {
+  if ($vars['block']->region == 'menu_bar') {
     $vars['classes_array'][] = 'menu-wrapper';
     $vars['classes_array'][] = 'menu-bar-wrapper';
     $vars['classes_array'][] = 'clearfix';
@@ -422,32 +432,30 @@ function adaptivetheme_preprocess_block(&$vars) {
   }
 
   // The menu bar region gets special treatment for the block template
-  if (at_get_setting('enable_menu_toggle', $theme_name) === 1) {
-    if (at_get_setting('menu_toggle_menu_bar', $theme_name) === 1) {
-      if ($vars['block']->region === 'menu_bar') {
+  if (at_get_setting('enable_menu_toggle', $theme_name) == 1) {
+    if (at_get_setting('menu_toggle_menu_bar', $theme_name) == 1) {
+      if ($vars['block']->region == 'menu_bar') {
         $vars['classes_array'][] = 'at-menu-toggle';
       }
     }
-
-    if (at_get_setting('menu_toggle_leaderboard', $theme_name) === 1 && $vars['block']->region === 'leaderboard') {
+    if (at_get_setting('menu_toggle_leaderboard', $theme_name) == 1 && $vars['block']->region == 'leaderboard') {
       $vars['classes_array'][] = 'at-menu-toggle';
       $vars['classes_array'][] = 'clearfix';
     }
-
-    if (at_get_setting('menu_toggle_header', $theme_name) === 1 && $vars['block']->region === 'header') {
+    if (at_get_setting('menu_toggle_header', $theme_name) == 1 && $vars['block']->region == 'header') {
       $vars['classes_array'][] = 'at-menu-toggle';
       $vars['classes_array'][] = 'clearfix';
     }
   }
 
   // Add extra classes if required
-  if (at_get_setting('extra_block_classes', $theme_name) === 1) {
+  if (at_get_setting('extra_block_classes', $theme_name) == 1) {
 
     // Zebra
     $vars['classes_array'][] = $vars['block_zebra'];
 
     // Position?
-    if ($vars['block_id'] === 1) {
+    if ($vars['block_id'] == 1) {
       $vars['classes_array'][] = 'first';
     }
     if (isset($vars['block']->last_in_region)) {
@@ -465,13 +473,22 @@ function adaptivetheme_preprocess_block(&$vars) {
   }
 
   // Add classes to theme the horizontal block option
-  if (at_get_setting('enable_extensions', $theme_name) === 1) {
-    if (at_get_setting('enable_markup_overides', $theme_name) === 1) {
-      if (at_get_setting('horizontal_login_block', $theme_name) === 1 && $vars['block']->module === 'user' && $vars['block']->delta === 'login') {
+  if (at_get_setting('enable_extensions', $theme_name) == 1) {
+    if (at_get_setting('enable_markup_overides', $theme_name) == 1) {
+      // Change the user menu title to the user name.
+      if (at_get_setting('user_block_user_name', $theme_name) == 1) {
+        if ($vars['block']->module == 'system' && $vars['block']->delta == 'user-menu') {
+          if (user_is_logged_in()) {
+            $vars['title'] = check_plain($user->name);
+          }
+        }
+      }
+      // Horizontal block classes.
+      if (at_get_setting('horizontal_login_block', $theme_name) == 1 && $vars['block']->module == 'user' && $vars['block']->delta == 'login') {
         $vars['classes_array'][] = 'lb-h';
         $vars['title_attributes_array']['class'][] = 'element-invisible';
       }
-      if (at_get_setting('slider_login_block', $theme_name) === 1 && $vars['block']->module === 'user' && $vars['block']->delta === 'login') {
+      if (at_get_setting('slider_login_block', $theme_name) == 1 && $vars['block']->module == 'user' && $vars['block']->delta == 'login') {
         $vars['classes_array'][] = 'lb-s';
       }
     }
@@ -480,6 +497,12 @@ function adaptivetheme_preprocess_block(&$vars) {
   // Give our block titles and content some additional class
   $vars['title_attributes_array']['class'][] = 'block-title';
   $vars['content_attributes_array']['class'] = array('block-content', 'content');
+
+  // Support aria-describedby
+  if ($vars['block']->subject && !empty($vars['attributes_array']['role'])) {
+    $vars['title_attributes_array']['id'] = drupal_html_id($vars['block']->subject);
+    $vars['attributes_array']['aria-describedby'] = $vars['title_attributes_array']['id'];
+  }
 
   // Add Aria Roles via attributes
   switch ($vars['block']->module) {
@@ -586,18 +609,18 @@ function adaptivetheme_preprocess_field(&$vars) {
   }
 
   // Image fields
-  if ($element['#field_type'] === 'image') {
+  if ($element['#field_type'] == 'image') {
 
     // Set some vars for image captioning, these always need to be initialized
     $vars['image_caption_teaser'] = FALSE;
     $vars['image_caption_full'] = FALSE;
 
     // Dont run anything if extensions or image settings are disabled
-    if (at_get_setting('enable_extensions', $theme_name) === 1) {
-      if (at_get_setting('enable_image_settings', $theme_name) === 1) {
+    if (at_get_setting('enable_extensions', $theme_name) == 1) {
+      if (at_get_setting('enable_image_settings', $theme_name) == 1) {
 
         // Reduce number of images in teaser view mode to single image
-        if (at_get_setting('image_teaser', $theme_name) === 1) {
+        if (at_get_setting('image_teaser', $theme_name) == 1) {
           if ($element['#view_mode'] == 'teaser') {
             $item = reset($vars['items']);
             $vars['items'] = array($item);
@@ -605,10 +628,10 @@ function adaptivetheme_preprocess_field(&$vars) {
         }
 
         // Captions
-        if (at_get_setting('image_caption_teaser', $theme_name) === 1) {
+        if (at_get_setting('image_caption_teaser', $theme_name) == 1) {
           $vars['image_caption_teaser'] = TRUE;
         }
-        if (at_get_setting('image_caption_full', $theme_name) === 1) {
+        if (at_get_setting('image_caption_full', $theme_name) == 1) {
           $vars['image_caption_full'] = TRUE;
         }
       }
@@ -627,7 +650,7 @@ function adaptivetheme_preprocess_node(&$vars) {
   $vars['classes_array'][] = 'article';
 
   // Extra classes if required
-  if (at_get_setting('extra_article_classes', $theme_name) === 1) {
+  if (at_get_setting('extra_article_classes', $theme_name) == 1) {
 
     // Zebra
     $vars['classes_array'][] = $vars['zebra'];
@@ -640,7 +663,8 @@ function adaptivetheme_preprocess_node(&$vars) {
     }
 
     // User picture?
-    if (at_get_setting('toggle_node_user_picture', $theme_name) === 1) {
+    // Should we all a check for the global settings here? SEE: https://drupal.org/node/2020687
+    if (at_get_setting('toggle_node_user_picture', $theme_name) == 1) {
       if ($vars['display_submitted'] && !empty($vars['picture'])) {
         $vars['classes_array'][] = 'node-with-picture';
       }
@@ -653,8 +677,8 @@ function adaptivetheme_preprocess_node(&$vars) {
   }
 
   // Image alignment and caption classes
-  if (at_get_setting('enable_extensions', $theme_name) === 1) {
-    if (at_get_setting('enable_image_settings', $theme_name) === 1) {
+  if (at_get_setting('enable_extensions', $theme_name) == 1) {
+    if (at_get_setting('enable_image_settings', $theme_name) == 1) {
       if ($vars['view_mode'] !== 'teaser') {
         if ($image_caption_full = at_get_setting('image_caption_full', $theme_name)) {
           $vars['classes_array'][] = $image_caption_full;
@@ -739,26 +763,27 @@ function adaptivetheme_preprocess_comment(&$vars) {
   $theme_name = $theme_key;
 
   // Extra comment classes if required
-  if (at_get_setting('extra_comment_classes', $theme_name) === 1) {
+  if (at_get_setting('extra_comment_classes', $theme_name) == 1) {
 
     // Zebra
     $vars['classes_array'][] = $vars['zebra'];
 
     // Position?
-    if ($vars['id'] === 1) {
+    if ($vars['id'] == 1) {
       $vars['classes_array'][] = 'first';
     }
-    if ($vars['id'] === $vars['node']->comment_count) {
+    if ($vars['id'] == $vars['node']->comment_count) {
       $vars['classes_array'][] = 'last';
     }
 
     // Title hidden?
-    if (at_get_setting('comments_hide_title', $theme_name) === 1) {
+    if (at_get_setting('comments_hide_title', $theme_name) == 1) {
       $vars['classes_array'][] = 'comment-title-hidden';
     }
 
     // User picture?
-    if (at_get_setting('toggle_comment_user_picture', $theme_name) === 1) {
+    // Should we add a check for the global settings here? SEE: https://drupal.org/node/2020687
+    if (at_get_setting('toggle_comment_user_picture', $theme_name) == 1) {
       if (!empty($vars['picture'])) {
         $vars['classes_array'][] = 'comment-with-picture';
       }
@@ -774,9 +799,9 @@ function adaptivetheme_preprocess_comment(&$vars) {
   $vars['title_attributes_array']['class'][] = 'comment-title';
 
   // Title hidden?
-  if (at_get_setting('enable_extensions', $theme_name) === 1) {
-    if (at_get_setting('enable_markup_overides', $theme_name) === 1) {
-      if (at_get_setting('comments_hide_title', $theme_name) === 1) {
+  if (at_get_setting('enable_extensions', $theme_name) == 1) {
+    if (at_get_setting('enable_markup_overides', $theme_name) == 1) {
+      if (at_get_setting('comments_hide_title', $theme_name) == 1) {
         $vars['title_attributes_array']['class'][] = 'element-invisible';
       }
     }
@@ -816,7 +841,7 @@ function adaptivetheme_preprocess_comment(&$vars) {
 
   // Unpublished?
   $vars['unpublished'] = ''; // Initialize for backwards compatibility
-  if ($vars['status'] === 'comment-unpublished') {
+  if ($vars['status'] == 'comment-unpublished') {
     // Use the title prefix to render the unpublished message
     $vars['title_prefix']['unpublished']['#markup'] = '<p class="unpublished">' . t('Unpublished') . '</p>';
   }
@@ -851,7 +876,6 @@ function adaptivetheme_preprocess_aggregator_item(&$vars) {
 function adaptivetheme_preprocess_menubar(&$vars) {
   global $theme_key;
   $theme_name = $theme_key;
-
   $type = $vars['type'];
 
   // menu bar id
@@ -860,11 +884,11 @@ function adaptivetheme_preprocess_menubar(&$vars) {
   $vars['classes_array'] = array('nav', 'clearfix');
 
   // Classes for toggle menus
-  if (at_get_setting('enable_menu_toggle', $theme_name) === 1) {
-    if (at_get_setting('menu_toggle_main_menu', $theme_name) === 1 && $type === 'primary') {
+  if (at_get_setting('enable_menu_toggle', $theme_name) == 1) {
+    if (at_get_setting('menu_toggle_main_menu', $theme_name) == 1 && $type == 'primary') {
       $vars['classes_array'][] = 'at-menu-toggle';
     }
-    if (at_get_setting('menu_toggle_secondary_menu', $theme_name) === 1 && $type === 'secondary') {
+    if (at_get_setting('menu_toggle_secondary_menu', $theme_name) == 1 && $type == 'secondary') {
       $vars['classes_array'][] = 'at-menu-toggle';
     }
   }
@@ -873,8 +897,10 @@ function adaptivetheme_preprocess_menubar(&$vars) {
   $vars['content_attributes_array']['class'][] = $type . '-menu-wrapper';
   $vars['content_attributes_array']['class'][] = 'menu-wrapper';
   $vars['content_attributes_array']['class'][] = 'clearfix';
-  // Set aria role
+  // Aria
   $vars['content_attributes_array']['role'][] = 'navigation';
+  $vars['content_attributes_array']['aria-labelledby'][] = $type . '-menu';
+
   // Add suggstions per menu type
   $vars['theme_hook_suggestions'][] = 'menubar__' . $type;
 }
@@ -886,9 +912,9 @@ function adaptivetheme_preprocess_username(&$vars) {
   global $theme_key;
   $theme_name = $theme_key;
   // Add rel=author for SEO and supporting search engines
-  if (at_get_setting('enable_extensions', $theme_name) === 1) {
-    if (at_get_setting('enable_markup_overides', $theme_name) === 1) {
-      if (at_get_setting('rel_author', $theme_name) === 1) {
+  if (at_get_setting('enable_extensions', $theme_name) == 1) {
+    if (at_get_setting('enable_markup_overides', $theme_name) == 1) {
+      if (at_get_setting('rel_author', $theme_name) == 1) {
         if (isset($vars['link_path'])) {
           $vars['link_attributes']['rel'][] = 'author';
         }
@@ -941,18 +967,18 @@ function adaptivetheme_preprocess_maintenance_page(&$vars) {
   at_load_layout_css($path, $theme_name);
 
   // Load Responsive Styles.
-  if (at_get_setting('disable_responsive_styles', $theme_name) === 0) {
+  if (at_get_setting('disable_responsive_styles', $theme_name) == 0) {
     at_load_responsive_css($path, $theme_name);
   }
 
   // Load fonts and/or Custom CSS
-  if (at_get_setting('enable_extensions', $theme_name) === 1) {
+  if (at_get_setting('enable_extensions', $theme_name) == 1) {
     // Fonts CSS
-    if (at_get_setting('enable_font_settings', $theme_name) === 1) {
+    if (at_get_setting('enable_font_settings', $theme_name) == 1) {
       at_load_fonts($path, $theme_name);
     }
     // Custom CSS
-    if (at_get_setting('enable_custom_css', $theme_name) === 1) {
+    if (at_get_setting('enable_custom_css', $theme_name) == 1) {
       at_load_custom_css($path, $theme_name);
     }
     // Load Extension Settings CSS
@@ -976,7 +1002,11 @@ function adaptivetheme_preprocess_maintenance_page(&$vars) {
     }
   }
 
-  $vars['attribution'] = "<small id=\"attribution\"><a href=\"http://adaptivethemes.com\">Premium Drupal Themes</a></small>";
+  // Attribution variable used in admin theme and some others
+  $vars['attribution'] = '';
+  if (at_get_setting('attribution_toggle', $theme_name) == 1) {
+    $vars['attribution'] = "<small class=\"attribution\">Premium Drupal Theme by <a href=\"http://adaptivethemes.com\">Adaptivethemes.com</a></small>";
+  }
 }
 
 /**

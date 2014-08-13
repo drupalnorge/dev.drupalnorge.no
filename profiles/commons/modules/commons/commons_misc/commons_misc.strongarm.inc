@@ -13,6 +13,15 @@ function commons_misc_strongarm() {
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
   $strongarm->api_version = 1;
+  $strongarm->name = 'navbar_libraries_variants';
+  $strongarm->value = array(
+    'modernizr' => 'source',
+  );
+  $export['navbar_libraries_variants'] = $strongarm;
+
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+  $strongarm->api_version = 1;
   $strongarm->name = 'theme_adaptivetheme_settings';
   $strongarm->value = array(
     'toggle_logo' => 1,
@@ -303,15 +312,6 @@ function commons_misc_strongarm() {
     'at_core' => '7.x-3.x',
   );
   $export['theme_commons_origins_settings'] = $strongarm;
-
-  $strongarm = new stdClass();
-  $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
-  $strongarm->api_version = 1;
-  $strongarm->name = 'navbar_libraries_variants';
-  $strongarm->value = array(
-    'modernizr' => 'source',
-  );
-  $export['navbar_libraries_variants'] = $strongarm;
 
   $strongarm = new stdClass();
   $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */

@@ -130,13 +130,13 @@ build_distro() {
 
         ## put commons profile and modules into the profile folder
         rm -rf docroot/profiles/commons
-        if [ -a $BUILD_PATH/repos.txt ]; then
+        if [ -e $BUILD_PATH/repos.txt ]; then
           UNTAR="tar -zxvf /tmp/commons.tar.gz -X $BUILD_PATH/repos.txt"
         else
           cd $BUILD_PATH/repos
-          find * -mindepth 1 -maxdepth 2 -type d -not -path ".*" -not -path "modules/.*" -not -path "themes/.*" -not -path "modules/contrib" -not -path "themes/contrib" > /tmp/repos.txt
+          find * -mindepth 1 -maxdepth 2 -type d -not -path ".*" -not -path "modules/.*" -not -path "themes/.*" -not -path "modules/contrib" -not -path "themes/contrib" > $BUILD_PATH/repos.txt
           # exclude repos since we're updating already by linking it to the repos directory.
-          UNTAR="tar -zxvf /tmp/commons.tar.gz -X /tmp/repos.txt"
+          UNTAR="tar -zxvf /tmp/commons.tar.gz -X $BUILD_PATH/repos.txt"
         fi
         cd $BUILD_PATH/docroot/profiles
         eval $UNTAR
@@ -200,7 +200,7 @@ case $1 in
     if [[ -n $2 ]] && [[ -n $3 ]]; then
       BUILD_PATH=$2
     else
-      echo "Usage build_distro.sh site-install [build_path] [site] [admin-email] [admin-pass]"
+      echo "Usage build_distro.sh site-install [build_path] [site] [demo-content] [admin-email] [admin-pass]"
     fi
     if [[ -n $3 ]]; then
       SITE=$3
@@ -213,12 +213,12 @@ case $1 in
       DEMO_CONTENT='FALSE'
     fi
     if [[ -n $5 ]]; then
-      ADMIN_EMAIL=$4
+      ADMIN_EMAIL=$5
     else
       ADMIN_EMAIL='admin@example.com'
     fi
     if [[ -n $6 ]]; then
-      ADMIN_PASS=$4
+      ADMIN_PASS=$6
     else
       ADMIN_PASS='admin'
     fi

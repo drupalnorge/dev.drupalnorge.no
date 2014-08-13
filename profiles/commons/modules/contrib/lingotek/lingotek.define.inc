@@ -19,7 +19,7 @@ function lingotek_define($key, $val) {
  * (2) inserting variable into a "config.php" file in The Lingotek Translation module folder 
  * (3) setting the environment var 'LINGOTEK_CONFIG_PATH' to a file path elsewhere on your system
  */
-$local_env_config_filepath = getenv('LINGOTEK_CONFIG_PATH');
+$local_env_config_filepath = function_exists('getenv') ? getenv('LINGOTEK_CONFIG_PATH') : (array_key_exists('LINGOTEK_CONFIG_PATH', $_SERVER) ? $_SERVER['LINGOTEK_CONFIG_PATH'] : FALSE);
 $local_config_file = $local_env_config_filepath !== FALSE ? $local_env_config_filepath : getcwd() . '/' . drupal_get_path('module', 'lingotek') . '/config.php';
 $use_local_override = file_exists($local_config_file);
 if ($use_local_override) {
@@ -34,7 +34,6 @@ if (variable_get('lingotek_use_stage_servers', FALSE)) {
   // Stage Servers
   lingotek_define('LINGOTEK_GMC_SERVER', 'https://gmc.lingotek.com/cms');
   lingotek_define('LINGOTEK_API_SERVER', 'http://cms.lingotek.com');
-  lingotek_define('LINGOTEK_BILLING_SERVER', 'https://billing-service.lingotek.com/billing-cms/account.json');
   lingotek_define('LINGOTEK_AP_OAUTH_KEY', 'd944c2ae-b66e-4322-b37e-40ba0a495eb7');
   lingotek_define('LINGOTEK_AP_OAUTH_SECRET', 'e4ae98ca-835b-4d9f-8faf-116ce9c69424');
 }
@@ -42,7 +41,6 @@ else {
   // Production Servers
   lingotek_define('LINGOTEK_GMC_SERVER', 'https://gmc.lingotek.com');
   lingotek_define('LINGOTEK_API_SERVER', 'https://myaccount.lingotek.com');
-  lingotek_define('LINGOTEK_BILLING_SERVER', 'https://billing-service.lingotek.com/billing/account.json');
   lingotek_define('LINGOTEK_AP_OAUTH_KEY', 'd944c2ae-b66e-4322-b37e-40ba0a495eb7');
   lingotek_define('LINGOTEK_AP_OAUTH_SECRET', 'e4ae98ca-835b-4d9f-8faf-116ce9c69424');
 }

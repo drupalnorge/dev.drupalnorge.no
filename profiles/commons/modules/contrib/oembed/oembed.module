@@ -5,6 +5,9 @@
  * Core functionality for oEmbed
  */
 
+// Load all Field module hooks for oEmbed.
+require_once dirname(__FILE__) . '/oembed.field.inc';
+
 require_once dirname(__FILE__) . '/oembed.filter.inc';
 
 /**
@@ -158,66 +161,6 @@ function oembed_theme() {
       'base hook' => 'oembed',
     ),
   );
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- *
- * Adds enabled oEmbed plugins to the list of enabled web media providers.
- */
-function oembed_form_media_internet_add_alter(&$form, $form_state) {
-  if (isset($form['providers'])) {
-    // Create an array to hold potential Internet media providers.
-    $providers = array();
-
-    // Determine if there are any visible providers.
-    foreach (media_internet_get_providers() as $key => $provider) {
-      if (empty($provider['hidden']) || $provider['hidden'] != TRUE) {
-        if ($provider['module'] != 'oembed') {
-          $providers[] = array(
-            'data' => check_plain($provider['title']),
-            'class' => array(drupal_html_class($provider['title'])),
-          );
-        }
-        else {
-          ctools_include('plugins');
-          $plugins = ctools_get_plugins('oembed', 'providers');
-          uasort($plugins, 'ctools_plugin_sort');
-
-          // Create an array to hold potential oEmbed providers.
-          $oembed_providers = array();
-
-          foreach ($plugins as $plugin) {
-            // A plugin with no schemes is effectively disabled.
-            if (!empty($plugin['scheme'])) {
-              // A scheme map is used to match a URL to a specific child plugin.
-              if (!empty($plugin['scheme map'])) {
-                foreach ($plugin['scheme map'] as $id => $scheme) {
-                  // This forces the 'get child' callback to the loaded.
-                  ctools_plugin_get_function($plugin, 'get child');
-                  $plugin = ctools_get_plugins('oembed', 'providers', $id);
-
-                  $oembed_providers[] = array(
-                    'data' => check_plain($plugin['title']),
-                    'class' => array(drupal_html_class($plugin['title'])),
-                  );
-                }
-              }
-            }
-          }
-
-          $providers[] = array(
-            'data' => check_plain($provider['title']),
-            'class' => array(drupal_html_class($provider['title'])),
-            'children' => $oembed_providers,
-          );
-        }
-      }
-    }
-
-    // Override the default list of providers.
-    $form['providers']['#items'] = $providers;
-  }
 }
 
 /**
@@ -934,75 +877,4 @@ function oembed_system_info_alter(&$info, $file, $type) {
       $info['dependencies'][] = 'media (>1.99)';
     }
   }
-}
-
-/**
- * Implements hook_field_formatter_info().
- */
-function oembed_field_formatter_info() {
-  $formatters = array(
-    'oembed_default' => array(
-      'label' => t('OEmbed'),
-      'field types' => array('link_field'),
-      'description' => t('Embeds links if possible - otherwise just links them.'),
-      'settings' => array('maxwidth' => '', 'maxheight' => ''),
-    ),
-  );
-
-  return $formatters;
-}
-
-/**
- * Implements hook_field_formatter_settings_form().
- */
-function oembed_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
-  $display = $instance['display'][$view_mode];
-  $settings = $display['settings'];
-
-  $element = array();
-  $element['maxwidth'] = array(
-    '#title' => t('Maximum Width'),
-    '#type' => 'textfield',
-    '#default_value' => $settings['maxwidth'],
-  );
-  $element['maxheight'] = array(
-    '#title' => t('Maximum Height'),
-    '#type' => 'textfield',
-    '#default_value' => $settings['maxheight'],
-  );
-
-  return $element;
-}
-
-/**
- * Implements hook_field_formatter_settings_summary().
- */
-function oembed_field_formatter_settings_summary($field, $instance, $view_mode) {
-  $display = $instance['display'][$view_mode];
-  $settings = $display['settings'];
-
-  $summary = '';
-
-  $summary .= t('Max Width') . ': ' . (!empty($settings['maxwidth']) ?  $settings['maxwidth'] : 'default');
-  $summary .= '<br />';
-  $summary .= t('Max Height') . ': ' . (!empty($settings['maxheight']) ?  $settings['maxheight'] : 'default');
-
-  return $summary;
-}
-
-/**
- * Implements hook_field_formatter_view().
- */
-function oembed_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $element = array();
-
-  foreach ($items as $delta => $item) {
-    $parameters = array();
-    $url = url($item['url'], $item + array('external' => TRUE));
-    $parameters = $display['settings'];
-
-    $element[$delta] = oembed_render_element('oembed', $url, $parameters);
-  }
-
-  return $element;
 }

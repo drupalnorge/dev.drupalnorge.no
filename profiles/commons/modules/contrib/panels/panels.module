@@ -258,7 +258,6 @@ function panels_init() {
   }
 
   ctools_add_css('panels', 'panels');
-  ctools_add_js('panels', 'panels');
 }
 
 /**
@@ -325,6 +324,15 @@ function panels_permission() {
 //  $legacy = panels_get_legacy_state();
 //  $legacy->determineStatus();
 //}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function panels_flush_caches() {
+  if (db_table_exists('cache_panels')) {
+    return array('cache_panels');
+  }
+}
 
 // ---------------------------------------------------------------------------
 // CTools hook implementations
@@ -925,8 +933,10 @@ function panels_save_display(&$display) {
       }
 
       if ($pane->pid != $old_pid) {
-        // and put it back so our pids and positions can be used
-        unset($display->content[$id]);
+        // Remove the old new-* entry from the displays content.
+        unset($display->content[$pid]);
+
+        // and put it back so our pids and positions can be used.
         $display->content[$pane->pid] = $pane;
 
         // If the title pane was one of our panes that just got its ID changed,
@@ -1044,7 +1054,7 @@ function panels_export_display($display, $prefix = '') {
     $region_counters = array();
     foreach ($display->content as $pane) {
 
-      if (empty($pane->uuid) || !ctools_uuid_is_valid($pane->uuid)) {
+      if (!isset($pane->uuid) || !ctools_uuid_is_valid($pane->uuid)) {
         $pane->uuid = ctools_uuid_generate();
       }
       $pid = 'new-' . $pane->uuid;

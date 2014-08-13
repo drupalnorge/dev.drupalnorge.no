@@ -7,6 +7,18 @@
 include_once 'commons_misc.features.inc';
 
 /**
+ * Implements hook_system_info_alter()
+ */
+function commons_misc_system_info_alter(&$info, $file, $type) {
+  // Remove the OG Example module from the features page as it displays a
+  // conflict with Commons Body, which is detected as a false positive when
+  // using behavioural tests to catch feature conflicts.
+  if ($type == 'module' && $file->name == 'og_example') {
+    unset($info['features']);
+  }
+}
+
+/**
  * Implements hook_mail_alter();
  */
 function commons_misc_mail_alter(&$message) {
@@ -46,13 +58,13 @@ function commons_misc_form_system_theme_settings_alter(&$form, &$form_state, $fo
   }
 }
 
-/*
- * Render a link to the official commons documentation located at
- * https://docs.acquia.com/commons
+/**
+ * Implements hook_navbar().
  */
 function commons_misc_navbar() {
   $items = array();
 
+  // Add a link to the official commons documentation.
   $items['documentation'] = array(
     '#type' => 'navbar_item',
     'tab' => array(
@@ -62,7 +74,7 @@ function commons_misc_navbar() {
       '#options' => array(
         'attributes' => array(
           'title' => t('Commons Documentation'),
-          'class' => array('icon', 'icon-help'),
+          'class' => array('navbar-icon', 'navbar-icon-help'),
           'target' => '_blank',
         ),
       ),

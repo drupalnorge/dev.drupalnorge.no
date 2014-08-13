@@ -10,10 +10,11 @@
 function commons_media_field_default_field_instances() {
   $field_instances = array();
 
-  $commons_groups_entity_types = commons_groups_get_group_content_entity_types();
-  if (!empty($commons_groups_entity_types)) {
-    foreach ($commons_groups_entity_types as $entity_type => $bundles) {
-      foreach(array_keys($bundles) as $bundle) {
+  $commons_groups_entity_types = commons_entity_integration_info();
+  foreach ($commons_groups_entity_types as $entity_type => $bundles) {
+    foreach ($bundles as $bundle => $integrations) {
+      if (isset($integrations['media']) && $integrations['media'] == TRUE
+        && isset($integrations['is_group_content']) && $integrations['is_group_content'] == TRUE) {
         commons_media_field_definition($field_instances, $entity_type, $bundle);
       }
     }
@@ -36,7 +37,7 @@ function commons_media_field_definition(&$field_instances, $entity_type, $bundle
           'file_view_mode' => 'default',
         ),
         'type' => 'file_rendered',
-        'weight' => 0,
+        'weight' => -48,
       ),
       'teaser' => array(
         'label' => 'hidden',
@@ -45,7 +46,7 @@ function commons_media_field_definition(&$field_instances, $entity_type, $bundle
           'file_view_mode' => 'teaser',
         ),
         'type' => 'file_rendered',
-        'weight' => 0,
+        'weight' => -48,
       ),
     ),
     'display_in_partial_form' => 1,
@@ -83,7 +84,7 @@ function commons_media_field_definition(&$field_instances, $entity_type, $bundle
         'progress_indicator' => 'throbber',
       ),
       'type' => 'media_generic',
-      'weight' => 2,
+      'weight' => -48,
     ),
   );
 
