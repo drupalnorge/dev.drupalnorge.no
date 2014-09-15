@@ -307,19 +307,16 @@ function commons_groups_group_contributors_count_topics($group) {
       $tids[] = $item['tid'];
     }
     $topics = taxonomy_term_load_multiple($tids);
-    $topics_text = ' discussing the @topics ';
-    $t_args = array('@topics' => format_plural(count($topics), 'topic', 'topics'));
     foreach ($topics as $topic) {
-      $topics_text .= '!topic-' . $topic->tid;
+      $topics_list .= l(t($topic->name), 'taxonomy/term/' . $topic->tid);
       if ($topic == end($topics)) {
-        $topics_text .= '.';
+        $topics_list .= '.';
       }
       else {
-        $topics_text .= ', ';
+        $topics_list .= ', ';
       }
-      $t_args['!topic-' . $topic->tid] = l(t($topic->name), 'taxonomy/term/' . $topic->tid);
     }
-    $output .= t($topics_text, $t_args);
+    $output .= ' ' . format_plural(count($topics), 'discussing the topic !list', 'discussing the topics !list', array('!list' => $topics_list));
   }
   return $output;
 }

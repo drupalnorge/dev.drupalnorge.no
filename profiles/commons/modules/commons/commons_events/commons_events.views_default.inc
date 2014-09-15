@@ -256,7 +256,9 @@ function commons_events_views_default_views() {
   $handler->display->display_options['fields']['capacity_used']['label'] = '';
   $handler->display->display_options['fields']['capacity_used']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['capacity_used']['separator'] = '';
-  $handler->display->display_options['fields']['capacity_used']['suffix'] = ' attendees';
+  $handler->display->display_options['fields']['capacity_used']['format_plural'] = TRUE;
+  $handler->display->display_options['fields']['capacity_used']['format_plural_singular'] = '1 attendee';
+  $handler->display->display_options['fields']['capacity_used']['format_plural_plural'] = '@count attendees';
   /* Field: Content: Comment count */
   $handler->display->display_options['fields']['comment_count']['id'] = 'comment_count';
   $handler->display->display_options['fields']['comment_count']['table'] = 'node_comment_statistics';
@@ -372,7 +374,10 @@ function commons_events_views_default_views() {
   $handler->display->display_options['fields']['capacity_used']['label'] = '';
   $handler->display->display_options['fields']['capacity_used']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['capacity_used']['separator'] = '';
-  $handler->display->display_options['fields']['capacity_used']['suffix'] = ' attendees,';
+  $handler->display->display_options['fields']['capacity_used']['format_plural'] = TRUE;
+  $handler->display->display_options['fields']['capacity_used']['format_plural_singular'] = '1 attendee';
+  $handler->display->display_options['fields']['capacity_used']['format_plural_plural'] = '@count attendees';
+  $handler->display->display_options['fields']['capacity_used']['suffix'] = ',';
   /* Field: Content: Comment count */
   $handler->display->display_options['fields']['comment_count']['id'] = 'comment_count';
   $handler->display->display_options['fields']['comment_count']['table'] = 'node_comment_statistics';
