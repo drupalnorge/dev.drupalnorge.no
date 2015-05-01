@@ -7,5 +7,5 @@ configure = admin/config/services/slack_invite
 version = "7.x-1.x-dev"
 core = "7.x"
 project = "slack_invite"
-datestamp = "1430468884"
+datestamp = "1430494381"
 

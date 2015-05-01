@@ -1,5 +1,9 @@
 <?php
 
+define('SLACK_INVITE_ALREADY_IN_TEAM', 'already_in_team');
+define('SLACK_INVITE_SENT_RECENTLY', 'sent_recently');
+define('SLACK_INVITE_ALREADY_INVITED', 'already_invited');
+
 /**
  * Implements hook_menu().
  */
@@ -115,7 +119,25 @@ function slack_invite_send_form_submit($form, &$form_state) {
       drupal_set_message(t('You will receive an email notification inviting you to join the slack team shortly.'));
     }
     else {
-      drupal_set_message(t('There was an error sending your invite. Please contact the administrator with the following error details. The error message from slack was: @message'), array('@message' => $data['error']));
+      $message = '';
+      switch ($data['error']) {
+        case SLACK_INVITE_ALREADY_IN_TEAM:
+          $message = t('The user is already a member of the team');
+          break;
+
+        case SLACK_INVITE_SENT_RECENTLY:
+          $message = t('The user was recently sent an invitation.');
+          break;
+
+        case SLACK_INVITE_ALREADY_INVITED:
+          $message = t('The user is already invited.');
+          break;
+
+        default:
+          $message = $data['error'];
+          break;
+      }
+      drupal_set_message(t('There was an error sending your invite. Please contact the administrator with the following error details. The error message from slack was: @message', array('@message' => $message)));
     }
   }
   else {
