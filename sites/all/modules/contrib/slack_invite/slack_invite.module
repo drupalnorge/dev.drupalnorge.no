@@ -79,8 +79,8 @@ function slack_invite_send_form($form, &$form_state) {
   }
   $form['slack_email'] = array(
     '#type' => 'textfield',
-    '#title' => 'Email',
-    '#description' => 'Enter email address for slack invite.',
+    '#title' => t('Email'),
+    '#description' => t('Enter email address for slack invite.'),
     '#default_value' => $email,
   );
 
